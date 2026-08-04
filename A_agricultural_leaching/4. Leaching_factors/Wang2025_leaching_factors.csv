@@ -1,0 +1,12 @@
+group,category,n_obs,LF_percent,CI_low_percent,CI_high_percent,use_for_pathway
+N fertilizer type,Organic,210,13.3,11.0,15.5,MANURE applied to cropland
+N fertilizer type,Synthetic,1286,14.6,13.5,15.6,synthetic fertilizer on cropland
+N fertilizer type,Synthetic-organic,459,12.2,11.0,13.5,combined synthetic+manure
+Crop,Maize,512,14.9,13.5,16.3,maize (synthetic & manure)
+Crop,Other upland crops,250,15.3,12.7,17.8,orchards/rapeseed/barley/etc
+Crop,Rice,116,0.85,0.43,1.26,rice (paddy - very low)
+Crop,Vegetable,507,17,15.4,18.5,vegetables
+Crop,Wheat,382,11.9,10.0,13.7,wheat
+Ecosystem,Cropland,1767,14,13.2,14.9,all cropland (benchmark)
+Ecosystem,Grassland,236,13.4,11.1,15.6,GRAZING / pasture proxy
+Ecosystem,Overall,2003,13.9,13.1,14.7,global mean (benchmark)

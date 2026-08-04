@@ -1,0 +1,1659 @@
+<?xml version="1.0"?>
+<AlteryxDocument yxmdVer="2025.2" RunE2="T">
+  <Nodes>
+    <Node ToolID="513">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.AlteryxSelect.AlteryxSelect">
+        <Position x="1470" y="822" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <OrderChanged value="False" />
+          <CommaDecimal value="False" />
+          <SelectFields>
+            <SelectField field="Sum_NOx" selected="True" rename="Sum_NOx_emissions" />
+            <SelectField field="*Unknown" selected="True" />
+          </SelectFields>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxSelect" />
+    </Node>
+    <Node ToolID="512">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.Formula.Formula">
+        <Position x="199" y="1099" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <FormulaFields>
+            <FormulaField expression="[Sum_NOx_emissions]*1000" field="Sum_NOx_emissions" size="8" type="Double" enabled="true" />
+            <FormulaField expression="&quot;kg&quot;" field="Unit" size="1073741823" type="V_WString" enabled="true" />
+          </FormulaFields>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText><![CDATA[Sum_NOx_emissions = [Sum_NOx_emissions]*1000
+Unit = "kg"
+]]></DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFormula" />
+    </Node>
+    <Node ToolID="514">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileInput.DbFileInput">
+        <Position x="186" y="1399" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Passwords />
+          <File OutputFileName="" FileFormat="19" SearchSubDirs="False" RecordLimit="">2A_Warm_values_CFs_NOx.yxdb</File>
+          <FormatSpecificOptions />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText>2A_Warm_values_CFs_NOx.yxdb</DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+        <MetaInfo connection="Output">
+          <RecordInfo>
+            <Field name="Cell_start" source="RecordID: Starting Value=1" type="Int64" />
+            <Field name="Cell_end" source="Transpose:" type="Int64" />
+            <Field name="CF" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_CFs model_final\CF_NOx_all.csv" type="Double" />
+            <Field name="LME_nb_f_1" size="254" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\1_NHx_Code\0_gridcells_LME_mapped.csv" type="V_String" />
+          </RecordInfo>
+        </MetaInfo>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileInput" />
+    </Node>
+    <Node ToolID="538">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.AlteryxSelect.AlteryxSelect">
+        <Position x="342" y="1399" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <OrderChanged value="False" />
+          <CommaDecimal value="False" />
+          <SelectFields>
+            <SelectField field="LME_nb_f_1" selected="True" rename="LME_subsegment" />
+            <SelectField field="*Unknown" selected="True" />
+          </SelectFields>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxSelect" />
+    </Node>
+    <Node ToolID="422">
+      <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
+        <Position x="54" y="162" width="157" height="195" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Caption>Container 422</Caption>
+          <Style TextColor="#314c4a" FillColor="#ecf2f2" BorderColor="#314c4a" Transparency="25" Margin="25" />
+          <Disabled value="False" />
+          <Folded value="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <ChildNodes>
+        <Node ToolID="453">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileInput.DbFileInput">
+            <Position x="79" y="211" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Passwords />
+              <File OutputFileName="" FileFormat="19" SearchSubDirs="False" RecordLimit="">5A_NOx_emissions_per_cellID_and_GLORIA_sector_2015-2022.yxdb</File>
+              <FormatSpecificOptions />
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>5A_NOx_emissions_per_cellID_and_GLORIA_sector_2015-2022.yxdb</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+            <MetaInfo connection="Output">
+              <RecordInfo>
+                <Field description="TextToColumns: Parsed from FileName" name="Year" size="1073741823" source="Summarize: GroupBy - Year" type="V_WString" />
+                <Field name="Cell_ID" source="Summarize: GroupBy - Cell_ID" type="Int32" />
+                <Field name="Region" size="254" source="Summarize: GroupBy - Region" type="V_WString" />
+                <Field name="Sector" size="3" source="Summarize: GroupBy - Name" type="String" />
+                <Field name="Sum_NOx" source="Summarize: Sum - Value" type="Double" />
+                <Field name="Unit" size="1073741823" source="Formula: &quot;Mega Gram&quot;" type="V_WString" />
+              </RecordInfo>
+            </MetaInfo>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileInput" />
+        </Node>
+      </ChildNodes>
+    </Node>
+    <Node ToolID="521">
+      <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
+        <Position x="2382" y="666" width="300" height="210" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Caption>Output</Caption>
+          <Style TextColor="#314c4a" FillColor="#ecf2f2" BorderColor="#314c4a" Transparency="25" Margin="25" />
+          <Disabled value="True" />
+          <Folded value="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <ChildNodes>
+        <Node ToolID="519">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileOutput.DbFileOutput">
+            <Position x="2551" y="715" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <File MaxRecords="" FileFormat="19">6A_NOx_2017_LME-eutrophication_MRIO_satellite_transposed.yxdb</File>
+              <Passwords />
+              <Disable>False</Disable>
+              <FormatSpecificOptions>
+                <WriteCompatibleVersion>False</WriteCompatibleVersion>
+                <NoSpatialIndex>False</NoSpatialIndex>
+                <SaveSource>True</SaveSource>
+                <SuppressBlankFile>False</SuppressBlankFile>
+              </FormatSpecificOptions>
+              <MultiFile value="False" />
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>6A_NOx_2017_LME-eutrophication_MRIO_satellite_transposed.yxdb</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileOutput" />
+        </Node>
+        <Node ToolID="520">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.Filter.Filter">
+            <Position x="2407" y="727" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Mode>Simple</Mode>
+              <Simple>
+                <Operator>=</Operator>
+                <Field>Year</Field>
+                <Operands>
+                  <IgnoreTimeInDateTime>True</IgnoreTimeInDateTime>
+                  <DateType>fixed</DateType>
+                  <PeriodDate>2026-05-06 12:11:50</PeriodDate>
+                  <PeriodType>
+                  </PeriodType>
+                  <PeriodCount>0</PeriodCount>
+                  <Operand>2017</Operand>
+                  <StartDate>2026-05-06 12:11:50</StartDate>
+                  <EndDate>2026-05-06 12:11:50</EndDate>
+                </Operands>
+              </Simple>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>[Year] = "2017"</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFilter" />
+        </Node>
+      </ChildNodes>
+    </Node>
+    <Node ToolID="175">
+      <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
+        <Position x="2358" y="162" width="300" height="210" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Caption>Output</Caption>
+          <Style TextColor="#314c4a" FillColor="#ecf2f2" BorderColor="#314c4a" Transparency="25" Margin="25" />
+          <Disabled value="True" />
+          <Folded value="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <ChildNodes>
+        <Node ToolID="174">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileOutput.DbFileOutput">
+            <Position x="2527" y="211" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <File MaxRecords="" FileFormat="19">6A_NOx_2015_LME-eutrophication_MRIO_satellite_transposed.yxdb</File>
+              <Passwords />
+              <Disable>False</Disable>
+              <FormatSpecificOptions>
+                <WriteCompatibleVersion>False</WriteCompatibleVersion>
+                <NoSpatialIndex>False</NoSpatialIndex>
+                <SaveSource>True</SaveSource>
+                <SuppressBlankFile>False</SuppressBlankFile>
+              </FormatSpecificOptions>
+              <MultiFile value="False" />
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>6A_NOx_2015_LME-eutrophication_MRIO_satellite_transposed.yxdb</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileOutput" />
+        </Node>
+        <Node ToolID="515">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.Filter.Filter">
+            <Position x="2383" y="223" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Mode>Simple</Mode>
+              <Simple>
+                <Operator>=</Operator>
+                <Field>Year</Field>
+                <Operands>
+                  <IgnoreTimeInDateTime>True</IgnoreTimeInDateTime>
+                  <DateType>fixed</DateType>
+                  <PeriodDate>2026-05-06 12:11:50</PeriodDate>
+                  <PeriodType>
+                  </PeriodType>
+                  <PeriodCount>0</PeriodCount>
+                  <Operand>2015</Operand>
+                  <StartDate>2026-05-06 12:11:50</StartDate>
+                  <EndDate>2026-05-06 12:11:50</EndDate>
+                </Operands>
+              </Simple>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>[Year] = "2015"</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFilter" />
+        </Node>
+      </ChildNodes>
+    </Node>
+    <Node ToolID="518">
+      <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
+        <Position x="2370" y="402" width="300" height="210" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Caption>Output</Caption>
+          <Style TextColor="#314c4a" FillColor="#ecf2f2" BorderColor="#314c4a" Transparency="25" Margin="25" />
+          <Disabled value="True" />
+          <Folded value="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <ChildNodes>
+        <Node ToolID="516">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileOutput.DbFileOutput">
+            <Position x="2539" y="451" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <File MaxRecords="" FileFormat="19">6A_NOx_2016_LME-eutrophication_MRIO_satellite_transposed.yxdb</File>
+              <Passwords />
+              <Disable>False</Disable>
+              <FormatSpecificOptions>
+                <WriteCompatibleVersion>False</WriteCompatibleVersion>
+                <NoSpatialIndex>False</NoSpatialIndex>
+                <SaveSource>True</SaveSource>
+                <SuppressBlankFile>False</SuppressBlankFile>
+              </FormatSpecificOptions>
+              <MultiFile value="False" />
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>6A_NOx_2016_LME-eutrophication_MRIO_satellite_transposed.yxdb</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileOutput" />
+        </Node>
+        <Node ToolID="517">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.Filter.Filter">
+            <Position x="2395" y="463" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Mode>Simple</Mode>
+              <Simple>
+                <Operator>=</Operator>
+                <Field>Year</Field>
+                <Operands>
+                  <IgnoreTimeInDateTime>True</IgnoreTimeInDateTime>
+                  <DateType>fixed</DateType>
+                  <PeriodDate>2026-05-06 12:11:50</PeriodDate>
+                  <PeriodType>
+                  </PeriodType>
+                  <PeriodCount>0</PeriodCount>
+                  <Operand>2016</Operand>
+                  <StartDate>2026-05-06 12:11:50</StartDate>
+                  <EndDate>2026-05-06 12:11:50</EndDate>
+                </Operands>
+              </Simple>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>[Year] = "2016"</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFilter" />
+        </Node>
+      </ChildNodes>
+    </Node>
+    <Node ToolID="524">
+      <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
+        <Position x="2394" y="930" width="300" height="210" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Caption>Output</Caption>
+          <Style TextColor="#314c4a" FillColor="#ecf2f2" BorderColor="#314c4a" Transparency="25" Margin="25" />
+          <Disabled value="True" />
+          <Folded value="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <ChildNodes>
+        <Node ToolID="522">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileOutput.DbFileOutput">
+            <Position x="2563" y="979" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <File MaxRecords="" FileFormat="19">6A_NOx_2018_LME-eutrophication_MRIO_satellite_transposed.yxdb</File>
+              <Passwords />
+              <Disable>False</Disable>
+              <FormatSpecificOptions>
+                <WriteCompatibleVersion>False</WriteCompatibleVersion>
+                <NoSpatialIndex>False</NoSpatialIndex>
+                <SaveSource>True</SaveSource>
+                <SuppressBlankFile>False</SuppressBlankFile>
+              </FormatSpecificOptions>
+              <MultiFile value="False" />
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>6A_NOx_2018_LME-eutrophication_MRIO_satellite_transposed.yxdb</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileOutput" />
+        </Node>
+        <Node ToolID="523">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.Filter.Filter">
+            <Position x="2419" y="1003" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Mode>Simple</Mode>
+              <Simple>
+                <Operator>=</Operator>
+                <Field>Year</Field>
+                <Operands>
+                  <IgnoreTimeInDateTime>True</IgnoreTimeInDateTime>
+                  <DateType>fixed</DateType>
+                  <PeriodDate>2026-05-06 12:11:50</PeriodDate>
+                  <PeriodType>
+                  </PeriodType>
+                  <PeriodCount>0</PeriodCount>
+                  <Operand>2018</Operand>
+                  <StartDate>2026-05-06 12:11:50</StartDate>
+                  <EndDate>2026-05-06 12:11:50</EndDate>
+                </Operands>
+              </Simple>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>[Year] = "2018"</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFilter" />
+        </Node>
+      </ChildNodes>
+    </Node>
+    <Node ToolID="527">
+      <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
+        <Position x="2706" y="150" width="300" height="210" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Caption>Output</Caption>
+          <Style TextColor="#314c4a" FillColor="#ecf2f2" BorderColor="#314c4a" Transparency="25" Margin="25" />
+          <Disabled value="True" />
+          <Folded value="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <ChildNodes>
+        <Node ToolID="525">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileOutput.DbFileOutput">
+            <Position x="2875" y="199" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <File MaxRecords="" FileFormat="19">6A_NOx_2019_LME-eutrophication_MRIO_satellite_transposed.yxdb</File>
+              <Passwords />
+              <Disable>False</Disable>
+              <FormatSpecificOptions>
+                <WriteCompatibleVersion>False</WriteCompatibleVersion>
+                <NoSpatialIndex>False</NoSpatialIndex>
+                <SaveSource>True</SaveSource>
+                <SuppressBlankFile>False</SuppressBlankFile>
+              </FormatSpecificOptions>
+              <MultiFile value="False" />
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>6A_NOx_2019_LME-eutrophication_MRIO_satellite_transposed.yxdb</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileOutput" />
+        </Node>
+        <Node ToolID="526">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.Filter.Filter">
+            <Position x="2731" y="210" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Mode>Simple</Mode>
+              <Simple>
+                <Operator>=</Operator>
+                <Field>Year</Field>
+                <Operands>
+                  <IgnoreTimeInDateTime>True</IgnoreTimeInDateTime>
+                  <DateType>fixed</DateType>
+                  <PeriodDate>2026-05-06 12:11:50</PeriodDate>
+                  <PeriodType>
+                  </PeriodType>
+                  <PeriodCount>0</PeriodCount>
+                  <Operand>2019</Operand>
+                  <StartDate>2026-05-06 12:11:50</StartDate>
+                  <EndDate>2026-05-06 12:11:50</EndDate>
+                </Operands>
+              </Simple>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>[Year] = "2019"</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFilter" />
+        </Node>
+      </ChildNodes>
+    </Node>
+    <Node ToolID="530">
+      <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
+        <Position x="2706" y="402" width="300" height="210" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Caption>Output</Caption>
+          <Style TextColor="#314c4a" FillColor="#ecf2f2" BorderColor="#314c4a" Transparency="25" Margin="25" />
+          <Disabled value="True" />
+          <Folded value="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <ChildNodes>
+        <Node ToolID="528">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileOutput.DbFileOutput">
+            <Position x="2875" y="451" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <File MaxRecords="" FileFormat="19">6A_NOx_2020_LME-eutrophication_MRIO_satellite_transposed.yxdb</File>
+              <Passwords />
+              <Disable>False</Disable>
+              <FormatSpecificOptions>
+                <WriteCompatibleVersion>False</WriteCompatibleVersion>
+                <NoSpatialIndex>False</NoSpatialIndex>
+                <SaveSource>True</SaveSource>
+                <SuppressBlankFile>False</SuppressBlankFile>
+              </FormatSpecificOptions>
+              <MultiFile value="False" />
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>6A_NOx_2020_LME-eutrophication_MRIO_satellite_transposed.yxdb</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileOutput" />
+        </Node>
+        <Node ToolID="529">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.Filter.Filter">
+            <Position x="2731" y="463" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Mode>Simple</Mode>
+              <Simple>
+                <Operator>=</Operator>
+                <Field>Year</Field>
+                <Operands>
+                  <IgnoreTimeInDateTime>True</IgnoreTimeInDateTime>
+                  <DateType>fixed</DateType>
+                  <PeriodDate>2026-05-06 12:11:50</PeriodDate>
+                  <PeriodType>
+                  </PeriodType>
+                  <PeriodCount>0</PeriodCount>
+                  <Operand>2020</Operand>
+                  <StartDate>2026-05-06 12:11:50</StartDate>
+                  <EndDate>2026-05-06 12:11:50</EndDate>
+                </Operands>
+              </Simple>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>[Year] = "2020"</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFilter" />
+        </Node>
+      </ChildNodes>
+    </Node>
+    <Node ToolID="533">
+      <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
+        <Position x="2706" y="666" width="300" height="210" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Caption>Output</Caption>
+          <Style TextColor="#314c4a" FillColor="#ecf2f2" BorderColor="#314c4a" Transparency="25" Margin="25" />
+          <Disabled value="True" />
+          <Folded value="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <ChildNodes>
+        <Node ToolID="531">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileOutput.DbFileOutput">
+            <Position x="2875" y="715" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <File MaxRecords="" FileFormat="19">6A_NOx_2021_LME-eutrophication_MRIO_satellite_transposed.yxdb</File>
+              <Passwords />
+              <Disable>False</Disable>
+              <FormatSpecificOptions>
+                <WriteCompatibleVersion>False</WriteCompatibleVersion>
+                <NoSpatialIndex>False</NoSpatialIndex>
+                <SaveSource>True</SaveSource>
+                <SuppressBlankFile>False</SuppressBlankFile>
+              </FormatSpecificOptions>
+              <MultiFile value="False" />
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>6A_NOx_2021_LME-eutrophication_MRIO_satellite_transposed.yxdb</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileOutput" />
+        </Node>
+        <Node ToolID="532">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.Filter.Filter">
+            <Position x="2731" y="727" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Mode>Simple</Mode>
+              <Simple>
+                <Operator>=</Operator>
+                <Field>Year</Field>
+                <Operands>
+                  <IgnoreTimeInDateTime>True</IgnoreTimeInDateTime>
+                  <DateType>fixed</DateType>
+                  <PeriodDate>2026-05-06 12:11:50</PeriodDate>
+                  <PeriodType>
+                  </PeriodType>
+                  <PeriodCount>0</PeriodCount>
+                  <Operand>2021</Operand>
+                  <StartDate>2026-05-06 12:11:50</StartDate>
+                  <EndDate>2026-05-06 12:11:50</EndDate>
+                </Operands>
+              </Simple>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>[Year] = "2021"</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFilter" />
+        </Node>
+      </ChildNodes>
+    </Node>
+    <Node ToolID="536">
+      <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
+        <Position x="2718" y="930" width="300" height="210" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Caption>Output</Caption>
+          <Style TextColor="#314c4a" FillColor="#ecf2f2" BorderColor="#314c4a" Transparency="25" Margin="25" />
+          <Disabled value="False" />
+          <Folded value="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <ChildNodes>
+        <Node ToolID="534">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileOutput.DbFileOutput">
+            <Position x="2887" y="979" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <File MaxRecords="" FileFormat="19">6A_NOx_2022_LME-eutrophication_MRIO_satellite_transposed.yxdb</File>
+              <Passwords />
+              <Disable>False</Disable>
+              <FormatSpecificOptions>
+                <WriteCompatibleVersion>False</WriteCompatibleVersion>
+                <NoSpatialIndex>False</NoSpatialIndex>
+                <SaveSource>True</SaveSource>
+                <SuppressBlankFile>False</SuppressBlankFile>
+              </FormatSpecificOptions>
+              <MultiFile value="False" />
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>6A_NOx_2022_LME-eutrophication_MRIO_satellite_transposed.yxdb</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileOutput" />
+        </Node>
+        <Node ToolID="535">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.Filter.Filter">
+            <Position x="2743" y="991" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Mode>Simple</Mode>
+              <Simple>
+                <Operator>=</Operator>
+                <Field>Year</Field>
+                <Operands>
+                  <IgnoreTimeInDateTime>True</IgnoreTimeInDateTime>
+                  <DateType>fixed</DateType>
+                  <PeriodDate>2026-05-06 12:11:50</PeriodDate>
+                  <PeriodType>
+                  </PeriodType>
+                  <PeriodCount>0</PeriodCount>
+                  <Operand>2022</Operand>
+                  <StartDate>2026-05-06 12:11:50</StartDate>
+                  <EndDate>2026-05-06 12:11:50</EndDate>
+                </Operands>
+              </Simple>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>[Year] = "2022"</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFilter" />
+        </Node>
+      </ChildNodes>
+    </Node>
+    <Node ToolID="214">
+      <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
+        <Position x="605" y="1253" width="1579" height="289" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Caption>Container 214</Caption>
+          <Style TextColor="#314c4a" FillColor="#ecf2f2" BorderColor="#314c4a" Transparency="25" Margin="25" />
+          <Disabled value="False" />
+          <Folded value="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <ChildNodes>
+        <Node ToolID="173">
+          <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
+            <Position x="630" y="1314" width="409" height="195" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Caption>Eutrophication impact calculation</Caption>
+              <Style TextColor="#314c4a" FillColor="#ff8080" BorderColor="#314c4a" Transparency="25" Margin="25" />
+              <Disabled value="False" />
+              <Folded value="False" />
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText />
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <ChildNodes>
+            <Node ToolID="170">
+              <GuiSettings Plugin="AlteryxBasePluginsGui.Formula.Formula">
+                <Position x="811" y="1363" />
+              </GuiSettings>
+              <Properties>
+                <Configuration>
+                  <FormulaFields>
+                    <FormulaField expression="[Sum_NOx_emissions]*[CF]" field="Eutrophication_end" size="8" type="Double" />
+                  </FormulaFields>
+                </Configuration>
+                <Annotation DisplayMode="0">
+                  <Name />
+                  <DefaultAnnotationText><![CDATA[Eutrophication_end = [Sum_NOx_emissions]*[CF]
+]]></DefaultAnnotationText>
+                  <Left value="False" />
+                </Annotation>
+              </Properties>
+              <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFormula" />
+            </Node>
+            <Node ToolID="171">
+              <GuiSettings Plugin="AlteryxSpatialPluginsGui.Summarize.Summarize">
+                <Position x="955" y="1363" />
+              </GuiSettings>
+              <Properties>
+                <Configuration>
+                  <SummarizeFields>
+                    <SummarizeField field="Year" action="GroupBy" rename="Year" />
+                    <SummarizeField field="Region" action="GroupBy" rename="Region" />
+                    <SummarizeField field="Sector" action="GroupBy" rename="Sector" />
+                    <SummarizeField field="LME_subsegment" action="GroupBy" rename="LME_subsegment" />
+                    <SummarizeField field="Eutrophication_end" action="Sum" rename="Sum_Eutrophication_end" />
+                  </SummarizeFields>
+                </Configuration>
+                <Annotation DisplayMode="0">
+                  <Name />
+                  <DefaultAnnotationText />
+                  <Left value="False" />
+                </Annotation>
+              </Properties>
+              <EngineSettings EngineDll="AlteryxSpatialPluginsEngine.dll" EngineDllEntryPoint="AlteryxSummarize" />
+            </Node>
+            <Node ToolID="172">
+              <GuiSettings Plugin="AlteryxBasePluginsGui.Join.Join">
+                <Position x="655" y="1363" />
+              </GuiSettings>
+              <Properties>
+                <Configuration joinByRecordPos="False">
+                  <JoinInfo connection="Left">
+                    <Field field="Cell_ID" />
+                  </JoinInfo>
+                  <JoinInfo connection="Right">
+                    <Field field="Cell_start" />
+                  </JoinInfo>
+                  <SelectConfiguration>
+                    <Configuration outputConnection="Join">
+                      <OrderChanged value="True" />
+                      <CommaDecimal value="False" />
+                      <SelectFields>
+                        <SelectField field="Left_Cell_ID" selected="False" input="Left_" />
+                        <SelectField field="Right_Cell_start" selected="True" input="Right_" />
+                        <SelectField field="Left_Region" selected="True" input="Left_" />
+                        <SelectField field="Left_Sector" selected="True" input="Left_" />
+                        <SelectField field="Right_Cell_end" selected="True" input="Right_" />
+                        <SelectField field="Right_CF" selected="True" input="Right_" />
+                        <SelectField field="Left_Year" selected="True" input="Left_" />
+                        <SelectField field="Left_Unit" selected="True" input="Left_" />
+                        <SelectField field="Left_Sum_NOx_emissions" selected="True" input="Left_" />
+                        <SelectField field="Right_LME_subsegment" selected="True" input="Right_" />
+                        <SelectField field="*Unknown" selected="True" />
+                      </SelectFields>
+                    </Configuration>
+                  </SelectConfiguration>
+                </Configuration>
+                <Annotation DisplayMode="0">
+                  <Name />
+                  <DefaultAnnotationText />
+                  <Left value="False" />
+                </Annotation>
+              </Properties>
+              <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxJoin" />
+            </Node>
+          </ChildNodes>
+        </Node>
+        <Node ToolID="180">
+          <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
+            <Position x="1566" y="1302" width="593" height="210" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Caption>Satellite creation</Caption>
+              <Style TextColor="#314c4a" FillColor="#80ffff" BorderColor="#314c4a" Transparency="25" Margin="25" />
+              <Disabled value="False" />
+              <Folded value="False" />
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText />
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <ChildNodes>
+            <Node ToolID="176">
+              <GuiSettings Plugin="AlteryxBasePluginsGui.CrossTab.CrossTab">
+                <Position x="1591" y="1351" />
+              </GuiSettings>
+              <Properties>
+                <Configuration>
+                  <GroupFields>
+                    <Field field="Year" />
+                    <Field field="Region" />
+                    <Field field="Sector" />
+                  </GroupFields>
+                  <HeaderField field="LME_subsegment" />
+                  <DataField field="Sum_Eutrophication_end" />
+                  <Methods>
+                    <Method method="Sum" />
+                  </Methods>
+                </Configuration>
+                <Annotation DisplayMode="0">
+                  <Name />
+                  <DefaultAnnotationText />
+                  <Left value="False" />
+                </Annotation>
+                <MetaInfo connection="Output">
+                  <RecordInfo>
+                    <Field description="TextToColumns: Parsed from FileName" name="Year" size="1073741823" source="CrossTab:Group:Sum:" type="V_WString" />
+                    <Field name="Region" size="254" source="CrossTab:Group:Sum:" type="V_WString" />
+                    <Field name="Sector" size="3" source="CrossTab:Group:Sum:" type="String" />
+                    <Field name="1_1" source="CrossTab:Header:LME_subsegment:1_1:Sum:" type="Double" />
+                    <Field name="1_2" source="CrossTab:Header:LME_subsegment:1_2:Sum:" type="Double" />
+                    <Field name="1_3" source="CrossTab:Header:LME_subsegment:1_3:Sum:" type="Double" />
+                    <Field name="1_4" source="CrossTab:Header:LME_subsegment:1_4:Sum:" type="Double" />
+                    <Field name="1_5" source="CrossTab:Header:LME_subsegment:1_5:Sum:" type="Double" />
+                    <Field name="1_6" source="CrossTab:Header:LME_subsegment:1_6:Sum:" type="Double" />
+                    <Field name="1_7" source="CrossTab:Header:LME_subsegment:1_7:Sum:" type="Double" />
+                    <Field name="2_1" source="CrossTab:Header:LME_subsegment:2_1:Sum:" type="Double" />
+                    <Field name="2_2" source="CrossTab:Header:LME_subsegment:2_2:Sum:" type="Double" />
+                    <Field name="2_3" source="CrossTab:Header:LME_subsegment:2_3:Sum:" type="Double" />
+                    <Field name="2_4" source="CrossTab:Header:LME_subsegment:2_4:Sum:" type="Double" />
+                    <Field name="3_0" source="CrossTab:Header:LME_subsegment:3_0:Sum:" type="Double" />
+                    <Field name="4_0" source="CrossTab:Header:LME_subsegment:4_0:Sum:" type="Double" />
+                    <Field name="5_1" source="CrossTab:Header:LME_subsegment:5_1:Sum:" type="Double" />
+                    <Field name="5_2" source="CrossTab:Header:LME_subsegment:5_2:Sum:" type="Double" />
+                    <Field name="5_3" source="CrossTab:Header:LME_subsegment:5_3:Sum:" type="Double" />
+                    <Field name="5_4" source="CrossTab:Header:LME_subsegment:5_4:Sum:" type="Double" />
+                    <Field name="5_5" source="CrossTab:Header:LME_subsegment:5_5:Sum:" type="Double" />
+                    <Field name="5_6" source="CrossTab:Header:LME_subsegment:5_6:Sum:" type="Double" />
+                    <Field name="5_7" source="CrossTab:Header:LME_subsegment:5_7:Sum:" type="Double" />
+                    <Field name="6_1" source="CrossTab:Header:LME_subsegment:6_1:Sum:" type="Double" />
+                    <Field name="6_2" source="CrossTab:Header:LME_subsegment:6_2:Sum:" type="Double" />
+                    <Field name="7_1" source="CrossTab:Header:LME_subsegment:7_1:Sum:" type="Double" />
+                    <Field name="7_2" source="CrossTab:Header:LME_subsegment:7_2:Sum:" type="Double" />
+                    <Field name="7_3" source="CrossTab:Header:LME_subsegment:7_3:Sum:" type="Double" />
+                    <Field name="8_1" source="CrossTab:Header:LME_subsegment:8_1:Sum:" type="Double" />
+                    <Field name="8_2" source="CrossTab:Header:LME_subsegment:8_2:Sum:" type="Double" />
+                    <Field name="8_3" source="CrossTab:Header:LME_subsegment:8_3:Sum:" type="Double" />
+                    <Field name="9_1" source="CrossTab:Header:LME_subsegment:9_1:Sum:" type="Double" />
+                    <Field name="9_2" source="CrossTab:Header:LME_subsegment:9_2:Sum:" type="Double" />
+                    <Field name="9_3" source="CrossTab:Header:LME_subsegment:9_3:Sum:" type="Double" />
+                    <Field name="9_4" source="CrossTab:Header:LME_subsegment:9_4:Sum:" type="Double" />
+                    <Field name="9_5" source="CrossTab:Header:LME_subsegment:9_5:Sum:" type="Double" />
+                    <Field name="9_6" source="CrossTab:Header:LME_subsegment:9_6:Sum:" type="Double" />
+                    <Field name="10_0" source="CrossTab:Header:LME_subsegment:10_0:Sum:" type="Double" />
+                    <Field name="11_1" source="CrossTab:Header:LME_subsegment:11_1:Sum:" type="Double" />
+                    <Field name="11_2" source="CrossTab:Header:LME_subsegment:11_2:Sum:" type="Double" />
+                    <Field name="12_1" source="CrossTab:Header:LME_subsegment:12_1:Sum:" type="Double" />
+                    <Field name="12_2" source="CrossTab:Header:LME_subsegment:12_2:Sum:" type="Double" />
+                    <Field name="12_3" source="CrossTab:Header:LME_subsegment:12_3:Sum:" type="Double" />
+                    <Field name="12_4" source="CrossTab:Header:LME_subsegment:12_4:Sum:" type="Double" />
+                    <Field name="12_5" source="CrossTab:Header:LME_subsegment:12_5:Sum:" type="Double" />
+                    <Field name="12_6" source="CrossTab:Header:LME_subsegment:12_6:Sum:" type="Double" />
+                    <Field name="13_1" source="CrossTab:Header:LME_subsegment:13_1:Sum:" type="Double" />
+                    <Field name="13_2" source="CrossTab:Header:LME_subsegment:13_2:Sum:" type="Double" />
+                    <Field name="13_3" source="CrossTab:Header:LME_subsegment:13_3:Sum:" type="Double" />
+                    <Field name="14_1" source="CrossTab:Header:LME_subsegment:14_1:Sum:" type="Double" />
+                    <Field name="14_2" source="CrossTab:Header:LME_subsegment:14_2:Sum:" type="Double" />
+                    <Field name="14_3" source="CrossTab:Header:LME_subsegment:14_3:Sum:" type="Double" />
+                    <Field name="14_4" source="CrossTab:Header:LME_subsegment:14_4:Sum:" type="Double" />
+                    <Field name="14_5" source="CrossTab:Header:LME_subsegment:14_5:Sum:" type="Double" />
+                    <Field name="14_6" source="CrossTab:Header:LME_subsegment:14_6:Sum:" type="Double" />
+                    <Field name="14_7" source="CrossTab:Header:LME_subsegment:14_7:Sum:" type="Double" />
+                    <Field name="14_8" source="CrossTab:Header:LME_subsegment:14_8:Sum:" type="Double" />
+                    <Field name="14_9" source="CrossTab:Header:LME_subsegment:14_9:Sum:" type="Double" />
+                    <Field name="14_10" source="CrossTab:Header:LME_subsegment:14_10:Sum:" type="Double" />
+                    <Field name="14_11" source="CrossTab:Header:LME_subsegment:14_11:Sum:" type="Double" />
+                    <Field name="14_12" source="CrossTab:Header:LME_subsegment:14_12:Sum:" type="Double" />
+                    <Field name="15_1" source="CrossTab:Header:LME_subsegment:15_1:Sum:" type="Double" />
+                    <Field name="15_2" source="CrossTab:Header:LME_subsegment:15_2:Sum:" type="Double" />
+                    <Field name="15_3" source="CrossTab:Header:LME_subsegment:15_3:Sum:" type="Double" />
+                    <Field name="16_1" source="CrossTab:Header:LME_subsegment:16_1:Sum:" type="Double" />
+                    <Field name="16_2" source="CrossTab:Header:LME_subsegment:16_2:Sum:" type="Double" />
+                    <Field name="17_1" source="CrossTab:Header:LME_subsegment:17_1:Sum:" type="Double" />
+                    <Field name="17_2" source="CrossTab:Header:LME_subsegment:17_2:Sum:" type="Double" />
+                    <Field name="17_3" source="CrossTab:Header:LME_subsegment:17_3:Sum:" type="Double" />
+                    <Field name="17_4" source="CrossTab:Header:LME_subsegment:17_4:Sum:" type="Double" />
+                    <Field name="17_5" source="CrossTab:Header:LME_subsegment:17_5:Sum:" type="Double" />
+                    <Field name="18_1" source="CrossTab:Header:LME_subsegment:18_1:Sum:" type="Double" />
+                    <Field name="18_2" source="CrossTab:Header:LME_subsegment:18_2:Sum:" type="Double" />
+                    <Field name="18_3" source="CrossTab:Header:LME_subsegment:18_3:Sum:" type="Double" />
+                    <Field name="18_4" source="CrossTab:Header:LME_subsegment:18_4:Sum:" type="Double" />
+                    <Field name="19_1" source="CrossTab:Header:LME_subsegment:19_1:Sum:" type="Double" />
+                    <Field name="19_2" source="CrossTab:Header:LME_subsegment:19_2:Sum:" type="Double" />
+                    <Field name="20_1" source="CrossTab:Header:LME_subsegment:20_1:Sum:" type="Double" />
+                    <Field name="20_2" source="CrossTab:Header:LME_subsegment:20_2:Sum:" type="Double" />
+                    <Field name="20_3" source="CrossTab:Header:LME_subsegment:20_3:Sum:" type="Double" />
+                    <Field name="20_4" source="CrossTab:Header:LME_subsegment:20_4:Sum:" type="Double" />
+                    <Field name="20_5" source="CrossTab:Header:LME_subsegment:20_5:Sum:" type="Double" />
+                    <Field name="20_6" source="CrossTab:Header:LME_subsegment:20_6:Sum:" type="Double" />
+                    <Field name="20_7" source="CrossTab:Header:LME_subsegment:20_7:Sum:" type="Double" />
+                    <Field name="20_8" source="CrossTab:Header:LME_subsegment:20_8:Sum:" type="Double" />
+                    <Field name="20_9" source="CrossTab:Header:LME_subsegment:20_9:Sum:" type="Double" />
+                    <Field name="20_10" source="CrossTab:Header:LME_subsegment:20_10:Sum:" type="Double" />
+                    <Field name="21_0" source="CrossTab:Header:LME_subsegment:21_0:Sum:" type="Double" />
+                    <Field name="22_1" source="CrossTab:Header:LME_subsegment:22_1:Sum:" type="Double" />
+                    <Field name="22_2" source="CrossTab:Header:LME_subsegment:22_2:Sum:" type="Double" />
+                    <Field name="22_3" source="CrossTab:Header:LME_subsegment:22_3:Sum:" type="Double" />
+                    <Field name="22_4" source="CrossTab:Header:LME_subsegment:22_4:Sum:" type="Double" />
+                    <Field name="22_5" source="CrossTab:Header:LME_subsegment:22_5:Sum:" type="Double" />
+                    <Field name="22_6" source="CrossTab:Header:LME_subsegment:22_6:Sum:" type="Double" />
+                    <Field name="22_7" source="CrossTab:Header:LME_subsegment:22_7:Sum:" type="Double" />
+                    <Field name="23_1" source="CrossTab:Header:LME_subsegment:23_1:Sum:" type="Double" />
+                    <Field name="23_2" source="CrossTab:Header:LME_subsegment:23_2:Sum:" type="Double" />
+                    <Field name="23_3" source="CrossTab:Header:LME_subsegment:23_3:Sum:" type="Double" />
+                    <Field name="23_4" source="CrossTab:Header:LME_subsegment:23_4:Sum:" type="Double" />
+                    <Field name="23_5" source="CrossTab:Header:LME_subsegment:23_5:Sum:" type="Double" />
+                    <Field name="24_1" source="CrossTab:Header:LME_subsegment:24_1:Sum:" type="Double" />
+                    <Field name="24_2" source="CrossTab:Header:LME_subsegment:24_2:Sum:" type="Double" />
+                    <Field name="24_3" source="CrossTab:Header:LME_subsegment:24_3:Sum:" type="Double" />
+                    <Field name="24_4" source="CrossTab:Header:LME_subsegment:24_4:Sum:" type="Double" />
+                    <Field name="24_5" source="CrossTab:Header:LME_subsegment:24_5:Sum:" type="Double" />
+                    <Field name="24_6" source="CrossTab:Header:LME_subsegment:24_6:Sum:" type="Double" />
+                    <Field name="25_0" source="CrossTab:Header:LME_subsegment:25_0:Sum:" type="Double" />
+                    <Field name="26_1" source="CrossTab:Header:LME_subsegment:26_1:Sum:" type="Double" />
+                    <Field name="26_2" source="CrossTab:Header:LME_subsegment:26_2:Sum:" type="Double" />
+                    <Field name="26_3" source="CrossTab:Header:LME_subsegment:26_3:Sum:" type="Double" />
+                    <Field name="26_4" source="CrossTab:Header:LME_subsegment:26_4:Sum:" type="Double" />
+                    <Field name="26_5" source="CrossTab:Header:LME_subsegment:26_5:Sum:" type="Double" />
+                    <Field name="26_6" source="CrossTab:Header:LME_subsegment:26_6:Sum:" type="Double" />
+                    <Field name="27_1" source="CrossTab:Header:LME_subsegment:27_1:Sum:" type="Double" />
+                    <Field name="27_2" source="CrossTab:Header:LME_subsegment:27_2:Sum:" type="Double" />
+                    <Field name="28_1" source="CrossTab:Header:LME_subsegment:28_1:Sum:" type="Double" />
+                    <Field name="28_2" source="CrossTab:Header:LME_subsegment:28_2:Sum:" type="Double" />
+                    <Field name="28_3" source="CrossTab:Header:LME_subsegment:28_3:Sum:" type="Double" />
+                    <Field name="29_1" source="CrossTab:Header:LME_subsegment:29_1:Sum:" type="Double" />
+                    <Field name="29_2" source="CrossTab:Header:LME_subsegment:29_2:Sum:" type="Double" />
+                    <Field name="30_1" source="CrossTab:Header:LME_subsegment:30_1:Sum:" type="Double" />
+                    <Field name="30_2" source="CrossTab:Header:LME_subsegment:30_2:Sum:" type="Double" />
+                    <Field name="30_3" source="CrossTab:Header:LME_subsegment:30_3:Sum:" type="Double" />
+                    <Field name="31_0" source="CrossTab:Header:LME_subsegment:31_0:Sum:" type="Double" />
+                    <Field name="32_1" source="CrossTab:Header:LME_subsegment:32_1:Sum:" type="Double" />
+                    <Field name="32_2" source="CrossTab:Header:LME_subsegment:32_2:Sum:" type="Double" />
+                    <Field name="32_3" source="CrossTab:Header:LME_subsegment:32_3:Sum:" type="Double" />
+                    <Field name="32_4" source="CrossTab:Header:LME_subsegment:32_4:Sum:" type="Double" />
+                    <Field name="32_5" source="CrossTab:Header:LME_subsegment:32_5:Sum:" type="Double" />
+                    <Field name="32_6" source="CrossTab:Header:LME_subsegment:32_6:Sum:" type="Double" />
+                    <Field name="32_7" source="CrossTab:Header:LME_subsegment:32_7:Sum:" type="Double" />
+                    <Field name="32_8" source="CrossTab:Header:LME_subsegment:32_8:Sum:" type="Double" />
+                    <Field name="33_1" source="CrossTab:Header:LME_subsegment:33_1:Sum:" type="Double" />
+                    <Field name="33_2" source="CrossTab:Header:LME_subsegment:33_2:Sum:" type="Double" />
+                    <Field name="34_1" source="CrossTab:Header:LME_subsegment:34_1:Sum:" type="Double" />
+                    <Field name="34_2" source="CrossTab:Header:LME_subsegment:34_2:Sum:" type="Double" />
+                    <Field name="34_3" source="CrossTab:Header:LME_subsegment:34_3:Sum:" type="Double" />
+                    <Field name="34_4" source="CrossTab:Header:LME_subsegment:34_4:Sum:" type="Double" />
+                    <Field name="34_5" source="CrossTab:Header:LME_subsegment:34_5:Sum:" type="Double" />
+                    <Field name="34_6" source="CrossTab:Header:LME_subsegment:34_6:Sum:" type="Double" />
+                    <Field name="34_7" source="CrossTab:Header:LME_subsegment:34_7:Sum:" type="Double" />
+                    <Field name="35_1" source="CrossTab:Header:LME_subsegment:35_1:Sum:" type="Double" />
+                    <Field name="35_2" source="CrossTab:Header:LME_subsegment:35_2:Sum:" type="Double" />
+                    <Field name="35_3" source="CrossTab:Header:LME_subsegment:35_3:Sum:" type="Double" />
+                    <Field name="35_4" source="CrossTab:Header:LME_subsegment:35_4:Sum:" type="Double" />
+                    <Field name="35_5" source="CrossTab:Header:LME_subsegment:35_5:Sum:" type="Double" />
+                    <Field name="36_1" source="CrossTab:Header:LME_subsegment:36_1:Sum:" type="Double" />
+                    <Field name="36_2" source="CrossTab:Header:LME_subsegment:36_2:Sum:" type="Double" />
+                    <Field name="36_3" source="CrossTab:Header:LME_subsegment:36_3:Sum:" type="Double" />
+                    <Field name="36_4" source="CrossTab:Header:LME_subsegment:36_4:Sum:" type="Double" />
+                    <Field name="36_5" source="CrossTab:Header:LME_subsegment:36_5:Sum:" type="Double" />
+                    <Field name="36_6" source="CrossTab:Header:LME_subsegment:36_6:Sum:" type="Double" />
+                    <Field name="36_7" source="CrossTab:Header:LME_subsegment:36_7:Sum:" type="Double" />
+                    <Field name="36_8" source="CrossTab:Header:LME_subsegment:36_8:Sum:" type="Double" />
+                    <Field name="36_9" source="CrossTab:Header:LME_subsegment:36_9:Sum:" type="Double" />
+                    <Field name="36_10" source="CrossTab:Header:LME_subsegment:36_10:Sum:" type="Double" />
+                    <Field name="36_11" source="CrossTab:Header:LME_subsegment:36_11:Sum:" type="Double" />
+                    <Field name="36_12" source="CrossTab:Header:LME_subsegment:36_12:Sum:" type="Double" />
+                    <Field name="36_13" source="CrossTab:Header:LME_subsegment:36_13:Sum:" type="Double" />
+                    <Field name="36_14" source="CrossTab:Header:LME_subsegment:36_14:Sum:" type="Double" />
+                    <Field name="36_15" source="CrossTab:Header:LME_subsegment:36_15:Sum:" type="Double" />
+                    <Field name="36_16" source="CrossTab:Header:LME_subsegment:36_16:Sum:" type="Double" />
+                    <Field name="36_17" source="CrossTab:Header:LME_subsegment:36_17:Sum:" type="Double" />
+                    <Field name="36_18" source="CrossTab:Header:LME_subsegment:36_18:Sum:" type="Double" />
+                    <Field name="37_1" source="CrossTab:Header:LME_subsegment:37_1:Sum:" type="Double" />
+                    <Field name="37_2" source="CrossTab:Header:LME_subsegment:37_2:Sum:" type="Double" />
+                    <Field name="38_1" source="CrossTab:Header:LME_subsegment:38_1:Sum:" type="Double" />
+                    <Field name="38_2" source="CrossTab:Header:LME_subsegment:38_2:Sum:" type="Double" />
+                    <Field name="38_3" source="CrossTab:Header:LME_subsegment:38_3:Sum:" type="Double" />
+                    <Field name="38_4" source="CrossTab:Header:LME_subsegment:38_4:Sum:" type="Double" />
+                    <Field name="38_5" source="CrossTab:Header:LME_subsegment:38_5:Sum:" type="Double" />
+                    <Field name="38_6" source="CrossTab:Header:LME_subsegment:38_6:Sum:" type="Double" />
+                    <Field name="38_7" source="CrossTab:Header:LME_subsegment:38_7:Sum:" type="Double" />
+                    <Field name="38_8" source="CrossTab:Header:LME_subsegment:38_8:Sum:" type="Double" />
+                    <Field name="38_9" source="CrossTab:Header:LME_subsegment:38_9:Sum:" type="Double" />
+                    <Field name="39_1" source="CrossTab:Header:LME_subsegment:39_1:Sum:" type="Double" />
+                    <Field name="39_2" source="CrossTab:Header:LME_subsegment:39_2:Sum:" type="Double" />
+                    <Field name="39_3" source="CrossTab:Header:LME_subsegment:39_3:Sum:" type="Double" />
+                    <Field name="39_4" source="CrossTab:Header:LME_subsegment:39_4:Sum:" type="Double" />
+                    <Field name="39_5" source="CrossTab:Header:LME_subsegment:39_5:Sum:" type="Double" />
+                    <Field name="39_6" source="CrossTab:Header:LME_subsegment:39_6:Sum:" type="Double" />
+                    <Field name="39_7" source="CrossTab:Header:LME_subsegment:39_7:Sum:" type="Double" />
+                    <Field name="39_8" source="CrossTab:Header:LME_subsegment:39_8:Sum:" type="Double" />
+                    <Field name="39_9" source="CrossTab:Header:LME_subsegment:39_9:Sum:" type="Double" />
+                    <Field name="40_1" source="CrossTab:Header:LME_subsegment:40_1:Sum:" type="Double" />
+                    <Field name="40_2" source="CrossTab:Header:LME_subsegment:40_2:Sum:" type="Double" />
+                    <Field name="40_3" source="CrossTab:Header:LME_subsegment:40_3:Sum:" type="Double" />
+                    <Field name="40_4" source="CrossTab:Header:LME_subsegment:40_4:Sum:" type="Double" />
+                    <Field name="41_0" source="CrossTab:Header:LME_subsegment:41_0:Sum:" type="Double" />
+                    <Field name="42_1" source="CrossTab:Header:LME_subsegment:42_1:Sum:" type="Double" />
+                    <Field name="42_2" source="CrossTab:Header:LME_subsegment:42_2:Sum:" type="Double" />
+                    <Field name="42_3" source="CrossTab:Header:LME_subsegment:42_3:Sum:" type="Double" />
+                    <Field name="43_1" source="CrossTab:Header:LME_subsegment:43_1:Sum:" type="Double" />
+                    <Field name="43_2" source="CrossTab:Header:LME_subsegment:43_2:Sum:" type="Double" />
+                    <Field name="43_3" source="CrossTab:Header:LME_subsegment:43_3:Sum:" type="Double" />
+                    <Field name="43_4" source="CrossTab:Header:LME_subsegment:43_4:Sum:" type="Double" />
+                    <Field name="44_0" source="CrossTab:Header:LME_subsegment:44_0:Sum:" type="Double" />
+                    <Field name="45_1" source="CrossTab:Header:LME_subsegment:45_1:Sum:" type="Double" />
+                    <Field name="45_2" source="CrossTab:Header:LME_subsegment:45_2:Sum:" type="Double" />
+                    <Field name="45_3" source="CrossTab:Header:LME_subsegment:45_3:Sum:" type="Double" />
+                    <Field name="45_4" source="CrossTab:Header:LME_subsegment:45_4:Sum:" type="Double" />
+                    <Field name="46_1" source="CrossTab:Header:LME_subsegment:46_1:Sum:" type="Double" />
+                    <Field name="46_2" source="CrossTab:Header:LME_subsegment:46_2:Sum:" type="Double" />
+                    <Field name="47_1" source="CrossTab:Header:LME_subsegment:47_1:Sum:" type="Double" />
+                    <Field name="47_2" source="CrossTab:Header:LME_subsegment:47_2:Sum:" type="Double" />
+                    <Field name="47_3" source="CrossTab:Header:LME_subsegment:47_3:Sum:" type="Double" />
+                    <Field name="47_4" source="CrossTab:Header:LME_subsegment:47_4:Sum:" type="Double" />
+                    <Field name="47_5" source="CrossTab:Header:LME_subsegment:47_5:Sum:" type="Double" />
+                    <Field name="47_6" source="CrossTab:Header:LME_subsegment:47_6:Sum:" type="Double" />
+                    <Field name="47_7" source="CrossTab:Header:LME_subsegment:47_7:Sum:" type="Double" />
+                    <Field name="48_1" source="CrossTab:Header:LME_subsegment:48_1:Sum:" type="Double" />
+                    <Field name="48_2" source="CrossTab:Header:LME_subsegment:48_2:Sum:" type="Double" />
+                    <Field name="48_3" source="CrossTab:Header:LME_subsegment:48_3:Sum:" type="Double" />
+                    <Field name="48_4" source="CrossTab:Header:LME_subsegment:48_4:Sum:" type="Double" />
+                    <Field name="48_5" source="CrossTab:Header:LME_subsegment:48_5:Sum:" type="Double" />
+                    <Field name="49_0" source="CrossTab:Header:LME_subsegment:49_0:Sum:" type="Double" />
+                    <Field name="50_1" source="CrossTab:Header:LME_subsegment:50_1:Sum:" type="Double" />
+                    <Field name="50_2" source="CrossTab:Header:LME_subsegment:50_2:Sum:" type="Double" />
+                    <Field name="51_0" source="CrossTab:Header:LME_subsegment:51_0:Sum:" type="Double" />
+                    <Field name="52_1" source="CrossTab:Header:LME_subsegment:52_1:Sum:" type="Double" />
+                    <Field name="52_2" source="CrossTab:Header:LME_subsegment:52_2:Sum:" type="Double" />
+                    <Field name="52_3" source="CrossTab:Header:LME_subsegment:52_3:Sum:" type="Double" />
+                    <Field name="52_4" source="CrossTab:Header:LME_subsegment:52_4:Sum:" type="Double" />
+                    <Field name="52_5" source="CrossTab:Header:LME_subsegment:52_5:Sum:" type="Double" />
+                    <Field name="52_6" source="CrossTab:Header:LME_subsegment:52_6:Sum:" type="Double" />
+                    <Field name="52_7" source="CrossTab:Header:LME_subsegment:52_7:Sum:" type="Double" />
+                    <Field name="53_0" source="CrossTab:Header:LME_subsegment:53_0:Sum:" type="Double" />
+                    <Field name="54_1" source="CrossTab:Header:LME_subsegment:54_1:Sum:" type="Double" />
+                    <Field name="54_2" source="CrossTab:Header:LME_subsegment:54_2:Sum:" type="Double" />
+                    <Field name="54_3" source="CrossTab:Header:LME_subsegment:54_3:Sum:" type="Double" />
+                    <Field name="54_4" source="CrossTab:Header:LME_subsegment:54_4:Sum:" type="Double" />
+                    <Field name="54_5" source="CrossTab:Header:LME_subsegment:54_5:Sum:" type="Double" />
+                    <Field name="54_6" source="CrossTab:Header:LME_subsegment:54_6:Sum:" type="Double" />
+                    <Field name="54_7" source="CrossTab:Header:LME_subsegment:54_7:Sum:" type="Double" />
+                    <Field name="54_8" source="CrossTab:Header:LME_subsegment:54_8:Sum:" type="Double" />
+                    <Field name="54_9" source="CrossTab:Header:LME_subsegment:54_9:Sum:" type="Double" />
+                    <Field name="54_10" source="CrossTab:Header:LME_subsegment:54_10:Sum:" type="Double" />
+                    <Field name="54_11" source="CrossTab:Header:LME_subsegment:54_11:Sum:" type="Double" />
+                    <Field name="54_12" source="CrossTab:Header:LME_subsegment:54_12:Sum:" type="Double" />
+                    <Field name="55_1" source="CrossTab:Header:LME_subsegment:55_1:Sum:" type="Double" />
+                    <Field name="55_2" source="CrossTab:Header:LME_subsegment:55_2:Sum:" type="Double" />
+                    <Field name="55_3" source="CrossTab:Header:LME_subsegment:55_3:Sum:" type="Double" />
+                    <Field name="55_4" source="CrossTab:Header:LME_subsegment:55_4:Sum:" type="Double" />
+                    <Field name="56_1" source="CrossTab:Header:LME_subsegment:56_1:Sum:" type="Double" />
+                    <Field name="56_2" source="CrossTab:Header:LME_subsegment:56_2:Sum:" type="Double" />
+                    <Field name="56_3" source="CrossTab:Header:LME_subsegment:56_3:Sum:" type="Double" />
+                    <Field name="56_4" source="CrossTab:Header:LME_subsegment:56_4:Sum:" type="Double" />
+                    <Field name="56_5" source="CrossTab:Header:LME_subsegment:56_5:Sum:" type="Double" />
+                    <Field name="56_6" source="CrossTab:Header:LME_subsegment:56_6:Sum:" type="Double" />
+                    <Field name="56_7" source="CrossTab:Header:LME_subsegment:56_7:Sum:" type="Double" />
+                    <Field name="57_1" source="CrossTab:Header:LME_subsegment:57_1:Sum:" type="Double" />
+                    <Field name="57_2" source="CrossTab:Header:LME_subsegment:57_2:Sum:" type="Double" />
+                    <Field name="57_3" source="CrossTab:Header:LME_subsegment:57_3:Sum:" type="Double" />
+                    <Field name="57_4" source="CrossTab:Header:LME_subsegment:57_4:Sum:" type="Double" />
+                    <Field name="57_5" source="CrossTab:Header:LME_subsegment:57_5:Sum:" type="Double" />
+                    <Field name="57_6" source="CrossTab:Header:LME_subsegment:57_6:Sum:" type="Double" />
+                    <Field name="57_7" source="CrossTab:Header:LME_subsegment:57_7:Sum:" type="Double" />
+                    <Field name="57_8" source="CrossTab:Header:LME_subsegment:57_8:Sum:" type="Double" />
+                    <Field name="57_9" source="CrossTab:Header:LME_subsegment:57_9:Sum:" type="Double" />
+                    <Field name="58_1" source="CrossTab:Header:LME_subsegment:58_1:Sum:" type="Double" />
+                    <Field name="58_2" source="CrossTab:Header:LME_subsegment:58_2:Sum:" type="Double" />
+                    <Field name="58_3" source="CrossTab:Header:LME_subsegment:58_3:Sum:" type="Double" />
+                    <Field name="58_4" source="CrossTab:Header:LME_subsegment:58_4:Sum:" type="Double" />
+                    <Field name="58_5" source="CrossTab:Header:LME_subsegment:58_5:Sum:" type="Double" />
+                    <Field name="58_6" source="CrossTab:Header:LME_subsegment:58_6:Sum:" type="Double" />
+                    <Field name="58_7" source="CrossTab:Header:LME_subsegment:58_7:Sum:" type="Double" />
+                    <Field name="58_8" source="CrossTab:Header:LME_subsegment:58_8:Sum:" type="Double" />
+                    <Field name="59_0" source="CrossTab:Header:LME_subsegment:59_0:Sum:" type="Double" />
+                    <Field name="60_0" source="CrossTab:Header:LME_subsegment:60_0:Sum:" type="Double" />
+                    <Field name="61_1" source="CrossTab:Header:LME_subsegment:61_1:Sum:" type="Double" />
+                    <Field name="61_2" source="CrossTab:Header:LME_subsegment:61_2:Sum:" type="Double" />
+                    <Field name="61_3" source="CrossTab:Header:LME_subsegment:61_3:Sum:" type="Double" />
+                    <Field name="62_1" source="CrossTab:Header:LME_subsegment:62_1:Sum:" type="Double" />
+                    <Field name="62_2" source="CrossTab:Header:LME_subsegment:62_2:Sum:" type="Double" />
+                    <Field name="62_3" source="CrossTab:Header:LME_subsegment:62_3:Sum:" type="Double" />
+                    <Field name="63_1" source="CrossTab:Header:LME_subsegment:63_1:Sum:" type="Double" />
+                    <Field name="63_2" source="CrossTab:Header:LME_subsegment:63_2:Sum:" type="Double" />
+                    <Field name="63_3" source="CrossTab:Header:LME_subsegment:63_3:Sum:" type="Double" />
+                    <Field name="63_4" source="CrossTab:Header:LME_subsegment:63_4:Sum:" type="Double" />
+                    <Field name="63_5" source="CrossTab:Header:LME_subsegment:63_5:Sum:" type="Double" />
+                    <Field name="63_6" source="CrossTab:Header:LME_subsegment:63_6:Sum:" type="Double" />
+                    <Field name="63_7" source="CrossTab:Header:LME_subsegment:63_7:Sum:" type="Double" />
+                    <Field name="63_8" source="CrossTab:Header:LME_subsegment:63_8:Sum:" type="Double" />
+                    <Field name="63_9" source="CrossTab:Header:LME_subsegment:63_9:Sum:" type="Double" />
+                    <Field name="63_10" source="CrossTab:Header:LME_subsegment:63_10:Sum:" type="Double" />
+                    <Field name="63_11" source="CrossTab:Header:LME_subsegment:63_11:Sum:" type="Double" />
+                    <Field name="63_12" source="CrossTab:Header:LME_subsegment:63_12:Sum:" type="Double" />
+                    <Field name="63_13" source="CrossTab:Header:LME_subsegment:63_13:Sum:" type="Double" />
+                    <Field name="64_0" source="CrossTab:Header:LME_subsegment:64_0:Sum:" type="Double" />
+                    <Field name="65_0" source="CrossTab:Header:LME_subsegment:65_0:Sum:" type="Double" />
+                    <Field name="66_1" source="CrossTab:Header:LME_subsegment:66_1:Sum:" type="Double" />
+                    <Field name="66_2" source="CrossTab:Header:LME_subsegment:66_2:Sum:" type="Double" />
+                    <Field name="67_1" source="CrossTab:Header:LME_subsegment:67_1:Sum:" type="Double" />
+                    <Field name="67_2" source="CrossTab:Header:LME_subsegment:67_2:Sum:" type="Double" />
+                    <Field name="67_3" source="CrossTab:Header:LME_subsegment:67_3:Sum:" type="Double" />
+                    <Field name="67_4" source="CrossTab:Header:LME_subsegment:67_4:Sum:" type="Double" />
+                    <Field name="68_1" source="CrossTab:Header:LME_subsegment:68_1:Sum:" type="Double" />
+                    <Field name="68_2" source="CrossTab:Header:LME_subsegment:68_2:Sum:" type="Double" />
+                    <Field name="68_3" source="CrossTab:Header:LME_subsegment:68_3:Sum:" type="Double" />
+                    <Field name="68_4" source="CrossTab:Header:LME_subsegment:68_4:Sum:" type="Double" />
+                    <Field name="68_5" source="CrossTab:Header:LME_subsegment:68_5:Sum:" type="Double" />
+                    <Field name="68_6" source="CrossTab:Header:LME_subsegment:68_6:Sum:" type="Double" />
+                    <Field name="69_1" source="CrossTab:Header:LME_subsegment:69_1:Sum:" type="Double" />
+                    <Field name="69_2" source="CrossTab:Header:LME_subsegment:69_2:Sum:" type="Double" />
+                    <Field name="70_1" source="CrossTab:Header:LME_subsegment:70_1:Sum:" type="Double" />
+                    <Field name="70_2" source="CrossTab:Header:LME_subsegment:70_2:Sum:" type="Double" />
+                    <Field name="70_3" source="CrossTab:Header:LME_subsegment:70_3:Sum:" type="Double" />
+                    <Field name="70_4" source="CrossTab:Header:LME_subsegment:70_4:Sum:" type="Double" />
+                  </RecordInfo>
+                </MetaInfo>
+              </Properties>
+              <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxCrossTab" />
+            </Node>
+            <Node ToolID="177">
+              <GuiSettings Plugin="AlteryxBasePluginsGui.AlteryxSelect.AlteryxSelect">
+                <Position x="1747" y="1351" />
+              </GuiSettings>
+              <Properties>
+                <Configuration>
+                  <OrderChanged value="False" />
+                  <CommaDecimal value="False" />
+                  <SelectFields>
+                    <SelectField field="*Unknown" selected="True" />
+                  </SelectFields>
+                </Configuration>
+                <Annotation DisplayMode="0">
+                  <Name />
+                  <DefaultAnnotationText />
+                  <Left value="False" />
+                </Annotation>
+              </Properties>
+              <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxSelect" />
+            </Node>
+            <Node ToolID="179">
+              <GuiSettings Plugin="AlteryxBasePluginsGui.Sort.Sort">
+                <Position x="2035" y="1351" />
+              </GuiSettings>
+              <Properties>
+                <Configuration>
+                  <SortInfo locale="1033">
+                    <Field field="Year" order="Ascending" />
+                    <Field field="Region" order="Ascending" />
+                    <Field field="Sector" order="Ascending" />
+                  </SortInfo>
+                </Configuration>
+                <Annotation DisplayMode="0">
+                  <Name />
+                  <DefaultAnnotationText>Year - Ascending
+Region - Ascending
+Sector - Ascending</DefaultAnnotationText>
+                  <Left value="False" />
+                </Annotation>
+              </Properties>
+              <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxSort" />
+            </Node>
+            <Node ToolID="455">
+              <GuiSettings>
+                <Position x="1855" y="1351" />
+              </GuiSettings>
+              <Properties>
+                <Configuration>
+                  <Value name="Check Box (135)">False</Value>
+                  <Value name="Check Box (136)">False</Value>
+                  <Value name="List Box (11)">""</Value>
+                  <Value name="Check Box (84)">True</Value>
+                  <Value name="Check Box (117)">True</Value>
+                  <Value name="Check Box (15)">True</Value>
+                  <Value name="Check Box (109)">False</Value>
+                  <Value name="Check Box (122)">False</Value>
+                  <Value name="Check Box (53)">False</Value>
+                  <Value name="Check Box (58)">False</Value>
+                  <Value name="Check Box (70)">False</Value>
+                  <Value name="Check Box (77)">False</Value>
+                  <Value name="Drop Down (81)">upper</Value>
+                </Configuration>
+                <Annotation DisplayMode="0">
+                  <Name />
+                  <DefaultAnnotationText />
+                  <Left value="False" />
+                </Annotation>
+              </Properties>
+              <EngineSettings Macro="Cleanse.yxmc" />
+            </Node>
+          </ChildNodes>
+        </Node>
+        <Node ToolID="149">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.AlteryxSelect.AlteryxSelect">
+            <Position x="1243" y="1351" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <OrderChanged value="False" />
+              <CommaDecimal value="False" />
+              <SelectFields>
+                <SelectField field="*Unknown" selected="True" />
+              </SelectFields>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText />
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxSelect" />
+        </Node>
+        <Node ToolID="153">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.Sort.Sort">
+            <Position x="1411" y="1351" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <SortInfo locale="1036">
+                <Field field="Year" order="Ascending" />
+                <Field field="Region" order="Ascending" />
+                <Field field="Sector" order="Ascending" />
+                <Field field="LME_subsegment" order="Ascending" />
+              </SortInfo>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>Year - Ascending
+Region - Ascending
+Sector - Ascending
+LME_subsegment - Ascending</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxSort" />
+        </Node>
+      </ChildNodes>
+    </Node>
+    <Node ToolID="539">
+      <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
+        <Position x="313" y="54" width="464" height="189" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Caption>Container 539</Caption>
+          <Style TextColor="#314c4a" FillColor="#ecf2f2" BorderColor="#314c4a" Transparency="25" Margin="25" />
+          <Disabled value="True" />
+          <Folded value="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <ChildNodes>
+        <Node ToolID="218">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.AlteryxSelect.AlteryxSelect">
+            <Position x="338" y="128" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <OrderChanged value="False" />
+              <CommaDecimal value="False" />
+              <SelectFields>
+                <SelectField field="Cell_ID" selected="True" type="Int64" size="8" />
+                <SelectField field="Sum_NH3" selected="True" rename="Sum_NH3_emissions" />
+                <SelectField field="*Unknown" selected="True" />
+              </SelectFields>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText />
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxSelect" />
+        </Node>
+        <Node ToolID="418">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.Filter.Filter">
+            <Position x="418" y="127" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Mode>Simple</Mode>
+              <Simple>
+                <Operator>&gt;</Operator>
+                <Field>Sum_NH3_emissions</Field>
+                <Operands>
+                  <IgnoreTimeInDateTime>True</IgnoreTimeInDateTime>
+                  <DateType>fixed</DateType>
+                  <PeriodDate>2025-12-10 22:00:31</PeriodDate>
+                  <PeriodType>
+                  </PeriodType>
+                  <PeriodCount>0</PeriodCount>
+                  <Operand>0</Operand>
+                  <StartDate>2025-12-10 22:00:31</StartDate>
+                  <EndDate>2025-12-10 22:00:31</EndDate>
+                </Operands>
+              </Simple>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>[Sum_NH3_emissions] &gt; 0</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFilter" />
+        </Node>
+        <Node ToolID="474">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.Filter.Filter">
+            <Position x="562" y="115" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Mode>Simple</Mode>
+              <Simple>
+                <Operator>=</Operator>
+                <Field>Region</Field>
+                <Operands>
+                  <IgnoreTimeInDateTime>True</IgnoreTimeInDateTime>
+                  <DateType>fixed</DateType>
+                  <PeriodDate>2026-05-01 16:11:24</PeriodDate>
+                  <PeriodType>
+                  </PeriodType>
+                  <PeriodCount>0</PeriodCount>
+                  <Operand>FRA</Operand>
+                  <StartDate>2026-05-01 16:11:24</StartDate>
+                  <EndDate>2026-05-01 16:11:24</EndDate>
+                </Operands>
+              </Simple>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>[Region] = "FRA"</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFilter" />
+        </Node>
+        <Node ToolID="475">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.Filter.Filter">
+            <Position x="670" y="103" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Mode>Simple</Mode>
+              <Simple>
+                <Operator>=</Operator>
+                <Field>Year</Field>
+                <Operands>
+                  <IgnoreTimeInDateTime>True</IgnoreTimeInDateTime>
+                  <DateType>fixed</DateType>
+                  <PeriodDate>2026-05-01 16:15:14</PeriodDate>
+                  <PeriodType>
+                  </PeriodType>
+                  <PeriodCount>0</PeriodCount>
+                  <Operand>2015</Operand>
+                  <StartDate>2026-05-01 16:15:14</StartDate>
+                  <EndDate>2026-05-01 16:15:14</EndDate>
+                </Operands>
+              </Simple>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>[Year] = 2015</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFilter" />
+        </Node>
+      </ChildNodes>
+    </Node>
+  </Nodes>
+  <Connections>
+    <Connection>
+      <Origin ToolID="513" Connection="Output" />
+      <Destination ToolID="512" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="512" Connection="Output" />
+      <Destination ToolID="172" Connection="Left" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="538" Connection="Output" />
+      <Destination ToolID="172" Connection="Right" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="514" Connection="Output" />
+      <Destination ToolID="538" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="453" Connection="Output" />
+      <Destination ToolID="218" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="453" Connection="Output" />
+      <Destination ToolID="515" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="453" Connection="Output" />
+      <Destination ToolID="517" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="453" Connection="Output" />
+      <Destination ToolID="520" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="453" Connection="Output" />
+      <Destination ToolID="523" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="453" Connection="Output" />
+      <Destination ToolID="526" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="453" Connection="Output" />
+      <Destination ToolID="529" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="453" Connection="Output" />
+      <Destination ToolID="532" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="453" Connection="Output" />
+      <Destination ToolID="535" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="535" Connection="True" />
+      <Destination ToolID="513" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="170" Connection="Output" />
+      <Destination ToolID="171" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="171" Connection="Output" />
+      <Destination ToolID="149" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="172" Connection="Join" />
+      <Destination ToolID="170" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="176" Connection="Output" />
+      <Destination ToolID="177" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="177" Connection="Output" />
+      <Destination ToolID="455" Connection="Input2" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="179" Connection="Output" />
+      <Destination ToolID="174" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="179" Connection="Output" />
+      <Destination ToolID="516" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="179" Connection="Output" />
+      <Destination ToolID="519" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="179" Connection="Output" />
+      <Destination ToolID="522" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="179" Connection="Output" />
+      <Destination ToolID="525" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="179" Connection="Output" />
+      <Destination ToolID="528" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="179" Connection="Output" />
+      <Destination ToolID="531" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="179" Connection="Output" />
+      <Destination ToolID="534" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="455" Connection="Output26" />
+      <Destination ToolID="179" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="149" Connection="Output" />
+      <Destination ToolID="153" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="153" Connection="Output" />
+      <Destination ToolID="176" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="218" Connection="Output" />
+      <Destination ToolID="418" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="418" Connection="True" />
+      <Destination ToolID="474" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="474" Connection="True" />
+      <Destination ToolID="475" Connection="Input" />
+    </Connection>
+  </Connections>
+  <Properties>
+    <Memory default="True" />
+    <GlobalRecordLimit value="0" />
+    <TempFiles default="True" />
+    <Annotation on="True" includeToolName="False" />
+    <ConvErrorLimit value="10" />
+    <ConvErrorLimit_Stop value="False" />
+    <CancelOnError value="False" />
+    <DisableBrowse value="False" />
+    <EnablePerformanceProfiling value="False" />
+    <RunWithE2 value="True" />
+    <DefaultTZ value="Local" />
+    <PredictiveToolsCodePage value="1252" />
+    <DisableAllOutput value="False" />
+    <ShowAllMacroMessages value="False" />
+    <ShowConnectionStatusIsOn value="True" />
+    <ShowConnectionStatusOnlyWhenRunning value="True" />
+    <ZoomLevel value="0" />
+    <LayoutType>Horizontal</LayoutType>
+    <IsTemplate value="False" />
+    <MetaInfo>
+      <NameIsFileName value="True" />
+      <Name>6_NOx_MRIO_satellite_Eutrophication</Name>
+      <Description />
+      <RootToolName />
+      <ToolVersion />
+      <ToolInDb value="False" />
+      <CategoryName />
+      <SearchTags />
+      <Author />
+      <Company />
+      <Copyright />
+      <DescriptionLink actual="" displayed="" />
+      <Example>
+        <Description />
+        <File />
+      </Example>
+      <WorkflowId value="d86a5cf7-d2c6-4224-8e29-d517bb59be9c" />
+      <Telemetry>
+        <PreviousWorkflowId value="4fd0feef-c645-4286-8f92-1e732f0e44f0" />
+        <OriginWorkflowId value="0ed6e2c1-0794-4253-927e-097ba2f33c6a" />
+      </Telemetry>
+      <PlatformWorkflowId value="" />
+    </MetaInfo>
+    <Events>
+      <Enabled value="True" />
+    </Events>
+  </Properties>
+</AlteryxDocument>
