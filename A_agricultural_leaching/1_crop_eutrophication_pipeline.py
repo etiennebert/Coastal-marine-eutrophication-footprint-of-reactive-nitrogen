@@ -8,7 +8,7 @@
 #   * Step by step (Spyder):  the code is split into  "# %%"  cells - put the cursor in a
 #                             cell and press Ctrl+Enter, top to bottom. No functions and no
 #                             hidden state: every line leaves a plain pandas/numpy variable
-#                             (cf, pts, cells, adal, alloc, box, out) you can open in the
+#                             (cf, pts, cells, adal, alloc, box, out, db1, db2) you can open in the
 #                             Variable Explorer and inspect.
 #   * PART A (the two spatial joins) is the slow part (a few minutes) and only has to run
 #     ONCE. After it, you can re-run PART B (the yearly loop) as often as you like - it's fast.
@@ -19,6 +19,13 @@
 #   E(cell,crop) = L(cell,crop) * 1e9 (kgN per MtN) * CF(cell)          -> marine eutrophication
 #   Atmospheric deposition is REMOVED from the IMAGE surplus so this does not double-count
 #   the separate airborne NH3 / NOx streams.
+#
+# OUTPUTS (per year, in "5. outputs_crops")
+#   DB1  crop_eutrophication_<year>.csv             one row per (cell, crop); Country_producer;
+#                                                   stops at LME_nb_f_1  (NO receptor split).
+#   DB2  crop_eutrophication_LMEcountry_<year>.csv  DB1 rows expanded to Country_LME, eutrophication
+#                                                   split by each country's EEZ share of the LME
+#                                                   (an ASSUMPTION: impact placed uniformly in LME).
 #
 # DOWNLOAD STATUS (important)
 #   Harvested_area_1961-2020.h5 may still be downloading (~2.8 GB complete). If it cannot be
@@ -52,9 +59,14 @@ AREA_FILE   = os.path.join(ADAL_DIR, "Harvested_area_1961-2020.h5")
 BASIN_SHP   = os.path.join(SHAPES, "3_BasinID_shape_PCR2", "BasinID_PCR2.shp")
 MOUTH_CSV   = os.path.join(HERE, "MouthID_PCR2.csv")
 LME_SHP     = os.path.join(SHAPES, "2_LME shape files", "cLME_ss_full.shp")
-CTRY_SHP    = os.path.join(SHAPES, "1_World_Countries", "Countries_EEZ_extended.shp")
+
+CTRY_SHP    = os.path.join(SHAPES, "1_World_Countries", "World_Countries.shp")
+EEZ_SHP     = os.path.join(SHAPES, "4_World_EEZ_v11", "eez_v11.shp")
+
 OUTDIR      = os.path.join(HERE, "5. outputs_crops")
 os.makedirs(OUTDIR, exist_ok=True)
+CRS_M = 6933   # metric CRS (World Cylindrical Equal Area) for every nearest-polygon join; degrees give a wrong "nearest"
+SAVE_ADAL_SPLIT = True   # option: dump the per-(cell,crop) Adalibieke split to "2. N_application_rate" for inspection (set False to skip)
 
 YEARS     = range(2015, 2023)          # 2015..2022 (IMAGE leaching years)
 KG_PER_MT = 1e9                        # IMAGE 'MtN' = Mt N = 1e9 kg N ; CF is per kg N
@@ -68,7 +80,7 @@ OTHER_LF_CLASS = "Other upland crops"
 print("HERE   =", HERE)
 print("OUTDIR =", OUTDIR)
 
-# %% A1) CF grid (5 arcmin) -> valid land cells, with fine id (fid) + parent 0.5 deg box id (cid)
+# %% A1) CF grid (5 arcmin) -> valid land cells, with fine id (fid) + parent 0.5 deg box id (coarse id, cid)
 cf = pd.read_csv(CF_CSV)[["longitude", "latitude", "CF"]]
 cf = cf.dropna(subset=["CF"])
 cf = cf[cf["CF"] != 0]                                    # drop ocean / zero-CF cells
@@ -78,37 +90,65 @@ cf["cid"] = (np.floor((90 - cf["latitude"]) / 0.5).astype(int) * 720
              + np.floor((cf["longitude"] + 180) / 0.5).astype(int))
 print("A1  CF land cells:", len(cf))
 
-# %% A2) tag each cell with its BasinID (point-in-polygon)      [SLOW: spatial join]
+# %% A2) GEO-JOIN 1 of 3 : each 5 arcmin land cell  ->  the river BASIN it drains to
+#   WHY : leaching leaves the land through a river basin, and every basin empties at one river
+#         mouth. We need that BasinID so A3 can route the basin's load to the right sea (LME).
+#   HOW : make each CF cell a POINT at its centre (lon/lat, EPSG:4326) and ask which basin POLYGON
+#         contains it. predicate="within" is a point-in-polygon test - no distance, so it is exact
+#         in lon/lat and needs no projection.
+#   NOTE: how="left" keeps a cell even if it matches no basin; a point on a shared border can match
+#         twice, so drop_duplicates(fid) keeps one basin per cell (fid = the 5 arcmin cell id).
 pts = gpd.GeoDataFrame(cf, geometry=gpd.points_from_xy(cf["longitude"], cf["latitude"]), crs=4326)
-basins = gpd.read_file(BASIN_SHP)[["BasinID", "geometry"]]
+basins = gpd.read_file(BASIN_SHP)[["BasinID", "geometry"]]          # PCR-GLOBWB river basins
 pts = gpd.sjoin(pts, basins, predicate="within", how="left").drop(columns="index_right")
-pts = pts.drop_duplicates(subset="fid")
+pts = pts.drop_duplicates(subset="fid")                            # one basin per cell
 pts["BasinID"] = pts["BasinID"].astype("Int64")
 print("A2  cells tagged with BasinID")
 
-# %% A3) BasinID -> LME sub-segment (nearest LME polygon to each river mouth; carries LME_nb_f_1)
-mouths = pd.read_csv(MOUTH_CSV).rename(columns={"ID": "BasinID"})
+# %% A3) GEO-JOIN 2 of 3 : each basin  ->  the LME sub-segment its river MOUTH falls in / nearest
+#   WHY : the marine eutrophication CF and the receiving sea are defined per LME sub-segment. A
+#         basin discharges at one mouth (MouthID_PCR2.csv = one lon/lat per BasinID), so the mouth
+#         decides which LME the basin's nitrogen reaches.
+#   HOW : sjoin_NEAREST matches each mouth point to the closest LME polygon. NEAREST (not within)
+#         because a mouth just offshore is inside no LME polygon.
+#   CRS : "nearest" is a DISTANCE, so both layers are reprojected to a metric equal-area CRS (CRS_M,
+#         metres). In raw degrees the nearest polygon can be wrong (a degree of longitude shrinks
+#         toward the poles). dist_m is kept as QA: 0 = mouth inside its LME; large = a far/inland
+#         basin whose LME is only a "nearest" guess.
+#   THEN: one row per basin (drop_duplicates BasinID), merged onto cells by BasinID, so every cell
+#         inherits the LME of the basin it drains to  (cell -> basin -> LME).
+mouths = pd.read_csv(MOUTH_CSV).rename(columns={"ID": "BasinID"})   # one river-mouth point per basin
 mouths = gpd.GeoDataFrame(mouths, geometry=gpd.points_from_xy(mouths["Longitude"], mouths["Latitude"]), crs=4326)
 lme = gpd.read_file(LME_SHP)[["LME_nb_f_1", "LME_NAME", "geometry"]]
-xwalk = (gpd.sjoin_nearest(mouths, lme, how="left", distance_col="dist_deg")
-            .drop_duplicates(subset="BasinID")[["BasinID", "LME_nb_f_1", "LME_NAME", "dist_deg"]])
+xwalk = (gpd.sjoin_nearest(mouths.to_crs(CRS_M), lme.to_crs(CRS_M), how="left", distance_col="dist_m")
+            .drop_duplicates(subset="BasinID")[["BasinID", "LME_nb_f_1", "LME_NAME", "dist_m"]])
 xwalk["BasinID"] = xwalk["BasinID"].astype("Int64")
-pts = pts.merge(xwalk, on="BasinID", how="left")
+pts = pts.merge(xwalk, on="BasinID", how="left")                   # cell -> basin -> LME
 print("A3  BasinID -> LME crosswalk merged")
 
-# %% A4) tag each cell with its Country (land + EEZ; nearest fill for rare misses)   [SLOW: spatial join]
-countries = gpd.read_file(CTRY_SHP)[["Country", "geometry"]]
+# %% A4) GEO-JOIN 3 of 3 : each cell  ->  the PRODUCER country (where the crop N is applied)
+#   WHY : this is the country credited with PRODUCING the leaching (renamed Country_producer in
+#         PART B). It is the emission/production side - NOT where the impact lands (that is
+#         Country_LME, built in PART B from the LME->country coverage).
+#   HOW : two steps.
+#     (1) WITHIN  : point-in-polygon against World_Countries land polygons (field COUNTRY->Country).
+#                   Nearly all arable cells are on land, so this resolves the vast majority exactly.
+#     (2) NEAREST : a few coastal cells fall just outside every land polygon (miss = NaN). For ONLY
+#                   those, sjoin_nearest assigns the closest country - again in metric CRS_M so
+#                   "nearest" is a real distance. (World_Countries is land-only; to attribute coastal
+#                   cells by maritime zone instead of nearest-land, use the eez_v11 layer.)
+countries = gpd.read_file(CTRY_SHP).rename(columns={"COUNTRY": "Country"})[["Country", "geometry"]]
 pts = gpd.sjoin(pts, countries, predicate="within", how="left").drop(columns="index_right")
-pts = pts.drop_duplicates(subset="fid")
-miss = pts["Country"].isna()
+pts = pts.drop_duplicates(subset="fid")                            # one country per cell
+miss = pts["Country"].isna()                                       # cells outside every land polygon
 if miss.any():
-    nn = (gpd.sjoin_nearest(pts.loc[miss, ["fid", "geometry"]], countries, how="left")
+    nn = (gpd.sjoin_nearest(pts.loc[miss, ["fid", "geometry"]].to_crs(CRS_M), countries.to_crs(CRS_M), how="left")
              .drop_duplicates(subset="fid").set_index("fid")["Country"])
-    pts.loc[miss, "Country"] = pts.loc[miss, "fid"].map(nn)
+    pts.loc[miss, "Country"] = pts.loc[miss, "fid"].map(nn)        # fill only the misses
 
 cells = pd.DataFrame(pts.drop(columns="geometry"))[
     ["fid", "longitude", "latitude", "CF", "cid",
-     "BasinID", "LME_nb_f_1", "LME_NAME", "dist_deg", "Country"]]
+     "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m", "Country"]]
 cells.to_csv(os.path.join(OUTDIR, "cell_attributes_static.csv"), index=False)
 print("A4  static cells:", len(cells), "-> saved cell_attributes_static.csv")
 
@@ -207,8 +247,29 @@ adal["P"]     = adal["Nsyn"] * adal["LF_c"] + adal["Nman"] * organic_lf
 adal = adal[adal["P"] > 0].copy()
 adal["share"] = adal["P"] / adal.groupby("cid")["P"].transform("sum")     # crop share within each 0.5 deg box
 alloc = adal[["fid", "cid", "crop", "lf_class", "share",
-              "longitude", "latitude", "CF", "BasinID", "LME_nb_f_1", "LME_NAME", "dist_deg", "Country"]]
+              "longitude", "latitude", "CF", "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m", "Country"]]
 print("A5d (cell x crop) allocation rows:", len(alloc))
+if SAVE_ADAL_SPLIT:
+    _split_cols = ["fid", "longitude", "latitude", "cid", "crop", "lf_class",
+                   "Nsyn", "Nman", "LF_c", "P", "share", "CF",
+                   "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m", "Country"]
+    _sp = os.path.join(ADAL_DIR, "adalibieke_crop_split_check.csv")
+    adal[_split_cols].to_csv(_sp, index=False)
+    print("A5d saved Adalibieke split -> 2. N_application_rate/adalibieke_crop_split_check.csv (%d rows)" % len(adal))
+
+
+# %% A5e SETUP) LME -> receptor-country crosswalk (validated), used in PART B's per-year loop.
+#   LME_country_match.csv: per LME sub-segment, each country's EEZ area fraction (LME_area_portion)
+#   from an EEZ(v11) x LME overlay - independently reproduced in Python (median fraction agreement
+#   0.001), in World_Countries naming so it joins to the emission-side 'Country' tag. Disputed LMEs
+#   whose portions sum >1 (overlapping EEZ claims) are renormalised to 1 so totals stay conserved;
+#   the unclaimed remainder (sum<1) is booked to 'High seas (ABNJ)'.
+LME_CTRY_MATCH = os.path.join(SHAPES, "5_LME_Country_match", "LME_country_match.csv")
+lme_ctry = pd.read_csv(LME_CTRY_MATCH).rename(
+    columns={"LME_subsegment": "LME_nb_f_1", "Country": "receptor_country", "LME_area_portion": "area_portion"})
+lme_psum = lme_ctry.groupby("LME_nb_f_1", as_index=False)["area_portion"].sum().rename(columns={"area_portion": "portion_sum"})
+print("A5e  LME->receptor match:", lme_ctry["LME_nb_f_1"].nunique(), "sub-segments,", lme_ctry["receptor_country"].nunique(), "countries")
+
 
 # %% PART B) per year: IMAGE cropland leaching -> allocate to (cell, crop) -> x CF -> save
 ds = xr.open_dataset(CROPLAND_NC)                            # add engine="h5netcdf" if the default backend fails
@@ -216,6 +277,7 @@ yr2i  = {int(y): i for i, y in enumerate(ds["time"].dt.year.values)}
 nodes = sorted(yr2i)                                         # IMAGE 5-yr steps (1970..2070)
 # agricultural N surplus with atmospheric deposition EXCLUDED (avoids double-counting NH3/NOx)
 NSURP = (ds["NutrientSurplus"] - ds["AtmosphericDeposition"]).clip(min=0)
+
 
 for Y in YEARS:
     y0 = max(y for y in nodes if y <= Y)                     # bracket Y between IMAGE steps
@@ -234,16 +296,51 @@ for Y in YEARS:
 
     a = alloc.merge(box[["cid", "L_box"]], on="cid", how="left")
     a["crop_leaching_MtN"] = a["L_box"] * a["share"]         # split the box total by crop share
-    a["eutrophication"]    = a["crop_leaching_MtN"] * KG_PER_MT * a["CF"]
+    a["eutrophication"]    = a["crop_leaching_MtN"] * KG_PER_MT * a["CF"]   # result in kg O2 (marine O2 depletion) = kg N x CF[kg O2 per kg N] (Cosme & Hauschild)
 
-    out = a.dropna(subset=["crop_leaching_MtN"])
-    out = out[["fid", "longitude", "latitude", "crop", "lf_class", "CF", "cid",
-               "BasinID", "LME_nb_f_1", "LME_NAME", "dist_deg", "Country",
+    # ---- DATABASE 1 : the honest per-(cell, crop) result -- NO receptor assumption ----------------
+    #   One row per producing cell x crop. Country_producer = where the N is applied; LME_nb_f_1 =
+    #   the sea the leaching reaches. We do NOT know WHERE inside that LME the impact lands, so DB1
+    #   stops at the LME. Use this table for producer-side / footprint results.
+    out = a.dropna(subset=["crop_leaching_MtN"]).rename(columns={"Country": "Country_producer"})
+    out.insert(0, "year", Y)
+    db1 = out[["year", "fid", "longitude", "latitude", "crop", "lf_class", "Country_producer",
+               "CF", "cid", "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m",
                "crop_leaching_MtN", "eutrophication"]]
-    out.to_csv(os.path.join(OUTDIR, "crop_eutrophication_cells_%d.csv" % Y), index=False)
-    print("%d : rows=%8d | placed=%6.3f of IMAGE %6.3f Tg N (%.0f%%) | eutrophication=%.4e"
-          % (Y, len(out), out["crop_leaching_MtN"].sum(), box["L_box"].sum(),
-             100 * out["crop_leaching_MtN"].sum() / box["L_box"].sum(), out["eutrophication"].sum()))
+    db1.to_csv(os.path.join(OUTDIR, "crop_eutrophication_%d.csv" % Y), index=False)
+    print("%d : DB1 cell-rows=%8d | placed=%6.3f of IMAGE %6.3f Tg N (%.0f%%) | eutrophication(kg O2)=%.4e"
+          % (Y, len(db1), db1["crop_leaching_MtN"].sum(), box["L_box"].sum(),
+             100 * db1["crop_leaching_MtN"].sum() / box["L_box"].sum(), db1["eutrophication"].sum()))
+
+    # ---- DATABASE 2 : receptor attribution -- ARTIFICIAL split by EEZ coverage of the LME ---------
+    #   Assumption: the impact is spread uniformly over the LME, so each cell's eutrophication is
+    #   divided among the countries whose EEZ makes up that LME, by their area share. A MODELLING
+    #   CHOICE - only the eutrophication is split (not the leaching, a land quantity). Each DB1 row
+    #   is EXPANDED into one row per receptor country.
+    #
+    #   THE MERGE (the geographic attribution):
+    #     db1  [key = LME_nb_f_1]   x   lme_ctry [LME_nb_f_1 -> receptor_country, area_portion]
+    #     how="inner"  -> a cell whose LME touches N countries becomes N rows.
+    #     lme_psum     = each LME's TOTAL covered fraction; w = area_portion / max(1, sum) renormalises
+    #                    disputed LMEs (sum>1) so the split never exceeds 100%.
+    #     ABNJ row     = the uncovered remainder (sum<1) as one 'High seas (ABNJ)' row, so the
+    #                    per-cell eutrophication is conserved exactly (DB2 rows sum to the DB1 value).
+    rc = db1.merge(lme_ctry, on="LME_nb_f_1", how="inner").merge(lme_psum, on="LME_nb_f_1", how="left")
+    rc["Country_LME"] = rc["receptor_country"]
+    rc["w"]           = rc["area_portion"] / rc["portion_sum"].clip(lower=1.0)   # renormalised EEZ share
+    abnj = db1.merge(lme_psum, on="LME_nb_f_1", how="left")
+    abnj["portion_sum"] = abnj["portion_sum"].fillna(0.0)          # LME absent from match -> 0 covered
+    abnj["Country_LME"] = "High seas (ABNJ)"
+    abnj["w"]           = (1.0 - abnj["portion_sum"]).clip(lower=0.0)            # uncovered remainder
+    db2 = pd.concat([rc, abnj], ignore_index=True)
+    db2["eutrophication"] = db2["eutrophication"] * db2["w"]       # split the marine impact only
+    db2 = db2[db2["eutrophication"] > 0]
+    db2 = db2[["year", "fid", "longitude", "latitude", "crop", "lf_class", "Country_producer",
+               "CF", "cid", "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m", "Country_LME",
+               "eutrophication"]]
+    db2.to_csv(os.path.join(OUTDIR, "crop_eutrophication_LMEcountry_%d.csv" % Y), index=False)
+    print("       DB2 receptor-rows=%8d (producer x LME-country) | conserved=%.4e kg O2 -> crop_eutrophication_LMEcountry_%d.csv"
+          % (len(db2), db2["eutrophication"].sum(), Y))
 
 ds.close()
 print("DONE -- per-year crop files written to", OUTDIR)

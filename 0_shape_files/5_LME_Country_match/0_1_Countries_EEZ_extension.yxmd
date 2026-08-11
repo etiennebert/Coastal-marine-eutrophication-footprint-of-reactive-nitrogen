@@ -1,0 +1,854 @@
+<?xml version="1.0"?>
+<AlteryxDocument yxmdVer="2025.2" RunE2="T">
+  <Nodes>
+    <Node ToolID="23">
+      <GuiSettings Plugin="AlteryxSpatialPluginsGui.SpatialProcess.SpatialProcess">
+        <Position x="618" y="199" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <SpatialObjFields field1="EEZ" field2="LAND" />
+          <Action action="Combine" noEmpty="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText>Combine</DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxSpatialPluginsEngine.dll" EngineDllEntryPoint="AlteryxSpatialProcess" />
+    </Node>
+    <Node ToolID="28">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileInput.DbFileInput">
+        <Position x="535" y="416" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Passwords />
+          <File OutputFileName="" RecordLimit="" SearchSubDirs="False" FileFormat="12">C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\3_LME shape files\cLME_ss_full.shp</File>
+          <FormatSpecificOptions>
+            <Projection />
+            <AllStrings>False</AllStrings>
+          </FormatSpecificOptions>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText>cLME_ss_full.shp</DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+        <Dependencies>
+          <Implicit />
+        </Dependencies>
+        <MetaInfo connection="Output">
+          <RecordInfo>
+            <Field name="LME_NUMBER" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\3_LME shape files\cLME_ss_full.shp" type="Int32" />
+            <Field name="LME_NAME" size="254" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\3_LME shape files\cLME_ss_full.shp" type="V_WString" />
+            <Field name="Area_km2" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\3_LME shape files\cLME_ss_full.shp" type="Double" />
+            <Field name="LME_numb_1" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\3_LME shape files\cLME_ss_full.shp" type="Double" />
+            <Field name="LME_nb_fin" size="254" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\3_LME shape files\cLME_ss_full.shp" type="V_WString" />
+            <Field name="FF__kg_N_i" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\3_LME shape files\cLME_ss_full.shp" type="Double" />
+            <Field name="XF__kg_O2_" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\3_LME shape files\cLME_ss_full.shp" type="Double" />
+            <Field name="SOS_1__kgO" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\3_LME shape files\cLME_ss_full.shp" type="Double" />
+            <Field name="SOS_2__kgO" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\3_LME shape files\cLME_ss_full.shp" type="Double" />
+            <Field name="LME_numb_2" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\3_LME shape files\cLME_ss_full.shp" type="Int32" />
+            <Field name="cLME_subse" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\3_LME shape files\cLME_ss_full.shp" type="Double" />
+            <Field name="LME_numb_3" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\3_LME shape files\cLME_ss_full.shp" type="Double" />
+            <Field name="LME_nb_f_1" size="254" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\3_LME shape files\cLME_ss_full.shp" type="V_WString" />
+            <Field name="subsegment" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\3_LME shape files\cLME_ss_full.shp" type="Int32" />
+            <Field name="Shape_Leng" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\3_LME shape files\cLME_ss_full.shp" type="Double" />
+            <Field name="Shape_Area" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\3_LME shape files\cLME_ss_full.shp" type="Double" />
+            <Field name="SpatialObj" size="2147483647" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\3_LME shape files\cLME_ss_full.shp" type="SpatialObj" />
+          </RecordInfo>
+        </MetaInfo>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileInput" />
+    </Node>
+    <Node ToolID="29">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.AlteryxSelect.AlteryxSelect">
+        <Position x="763" y="416" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <OrderChanged value="False" />
+          <CommaDecimal value="False" />
+          <SelectFields>
+            <SelectField field="Area_km2" selected="False" />
+            <SelectField field="LME_numb_1" selected="False" />
+            <SelectField field="LME_nb_fin" selected="False" />
+            <SelectField field="FF__kg_N_i" selected="False" />
+            <SelectField field="XF__kg_O2_" selected="False" />
+            <SelectField field="SOS_1__kgO" selected="False" />
+            <SelectField field="SOS_2__kgO" selected="False" />
+            <SelectField field="LME_numb_2" selected="False" />
+            <SelectField field="cLME_subse" selected="True" type="V_WString" size="19" />
+            <SelectField field="LME_numb_3" selected="False" />
+            <SelectField field="subsegment" selected="False" />
+            <SelectField field="Shape_Leng" selected="False" />
+            <SelectField field="Shape_Area" selected="False" />
+            <SelectField field="*Unknown" selected="True" />
+          </SelectFields>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxSelect" />
+    </Node>
+    <Node ToolID="31">
+      <GuiSettings Plugin="AlteryxSpatialPluginsGui.SpatialInfo.SpatialInfo">
+        <Position x="667" y="416" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <SpatialObj field="SpatialObj" />
+          <SelectedItems>
+            <Item name="AreaKm" />
+          </SelectedItems>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxSpatialPluginsEngine.dll" EngineDllEntryPoint="AlteryxSpatialInfo" />
+    </Node>
+    <Node ToolID="32">
+      <GuiSettings Plugin="AlteryxSpatialPluginsGui.SpatialMatch.SpatialMatch">
+        <Position x="895" y="320" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Target SpatialObj="SpatialObj" />
+          <Universe SpatialObj="SpatialObj_Process" />
+          <Method method="Intersects" />
+          <SelectConfiguration>
+            <Configuration outputConnection="Matched">
+              <OrderChanged value="False" />
+              <CommaDecimal value="False" />
+              <SelectFields>
+                <SelectField field="Target_LME_NUMBER" selected="True" input="Target_" />
+                <SelectField field="Target_LME_NAME" selected="True" input="Target_" />
+                <SelectField field="Target_cLME_subse" selected="False" rename="LME_subsegment" input="Target_" />
+                <SelectField field="Target_LME_nb_f_1" selected="True" rename="LME_subsegment" input="Target_" />
+                <SelectField field="Target_AreaSqKm" selected="True" rename="LME_area" input="Target_" />
+                <SelectField field="Universe_Country" selected="True" input="Universe_" />
+                <SelectField field="IntersectPoly" selected="True" />
+                <SelectField field="Universe_SpatialObj" selected="False" rename="Universe_SpatialObj" input="Universe_" />
+                <SelectField field="*Unknown" selected="False" />
+              </SelectFields>
+            </Configuration>
+          </SelectConfiguration>
+          <IntersectPoly value="True" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText>SpatialObj Where Target Intersects Universe SpatialObj_Process</DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxSpatialPluginsEngine.dll" EngineDllEntryPoint="AlteryxSpatialMatch" />
+    </Node>
+    <Node ToolID="34">
+      <GuiSettings Plugin="AlteryxSpatialPluginsGui.Summarize.Summarize">
+        <Position x="1027" y="320" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <SummarizeFields>
+            <SummarizeField field="LME_subsegment" action="GroupBy" rename="LME_subsegment" />
+            <SummarizeField field="LME_area" action="First" rename="LME_area" />
+            <SummarizeField field="Country" action="GroupBy" rename="Country" />
+            <SummarizeField field="IntersectPoly" action="SpatialObjCombine" rename="SpatialObjCombine_IntersectPoly" />
+          </SummarizeFields>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxSpatialPluginsEngine.dll" EngineDllEntryPoint="AlteryxSummarize" />
+    </Node>
+    <Node ToolID="37">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.Formula.Formula">
+        <Position x="1603" y="308" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <FormulaFields>
+            <FormulaField expression="[LME_country_area]/[LME_area]" field="LME_area_portion" size="8" type="Double" />
+          </FormulaFields>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText><![CDATA[LME_area_portion = [LME_country_area]/[LME_area]
+]]></DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFormula" />
+    </Node>
+    <Node ToolID="38">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.AlteryxSelect.AlteryxSelect">
+        <Position x="1759" y="308" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <OrderChanged value="False" />
+          <CommaDecimal value="False" />
+          <SelectFields>
+            <SelectField field="LME_subsegment" selected="True" />
+            <SelectField field="Country" selected="True" />
+            <SelectField field="LME_area_portion" selected="True" />
+            <SelectField field="*Unknown" selected="False" />
+          </SelectFields>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxSelect" />
+    </Node>
+    <Node ToolID="47">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileOutput.DbFileOutput">
+        <Position x="894" y="102" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <File FileFormat="12" MaxRecords="">Shapes/countries_EEZ_extended.shp</File>
+          <Passwords />
+          <Disable>False</Disable>
+          <FormatSpecificOptions>
+            <SpatialObjField>EEZ</SpatialObjField>
+            <Projection />
+            <CodePage>0</CodePage>
+          </FormatSpecificOptions>
+          <MultiFile value="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText>countries_EEZ_extended.shp</DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileOutput" />
+    </Node>
+    <Node ToolID="46">
+      <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
+        <Position x="54" y="54" width="492" height="322" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Caption>Mapping from external sources</Caption>
+          <Style TextColor="#314c4a" FillColor="#ff8040" BorderColor="#314c4a" Transparency="25" Margin="25" />
+          <Disabled value="False" />
+          <Folded value="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <ChildNodes>
+        <Node ToolID="18">
+          <GuiSettings Plugin="AlteryxSpatialPluginsGui.Summarize.Summarize">
+            <Position x="439" y="116" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <SummarizeFields>
+                <SummarizeField field="Country" action="GroupBy" rename="Country" />
+                <SummarizeField field="EEZ" action="SpatialObjCombine" rename="EEZ" />
+                <SummarizeField field="LAND" action="SpatialObjCombine" rename="LAND" />
+              </SummarizeFields>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText />
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxSpatialPluginsEngine.dll" EngineDllEntryPoint="AlteryxSummarize" />
+        </Node>
+        <Node ToolID="20">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.Union.Union">
+            <Position x="462" y="199" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <AutoResetMode>Custom</AutoResetMode>
+              <MultiMetaInfo>
+                <MetaInfo name="#1">
+                  <RecordInfo>
+                    <Field name="Country" size="255" source="Summarize: GroupBy - Country" type="V_String" column="1" />
+                    <Field name="EEZ" size="2147483647" source="Summarize: SpatialObjCombine - EEZ" type="SpatialObj" column="2" />
+                    <Field name="LAND" size="2147483647" source="Summarize: SpatialObjCombine - LAND" type="SpatialObj" column="3" />
+                  </RecordInfo>
+                </MetaInfo>
+                <MetaInfo name="#2">
+                  <RecordInfo>
+                    <Field name="COUNTRY" size="100" source="File: C:\Users\nicop\OneDrive\Bureau\Thesis submission files\Alteryx\Countries AA_polygon\World_Countries\World_Countries.shp" type="V_WString" column="1" />
+                    <Field name="SpatialObj" size="2147483647" source="File: C:\Users\nicop\OneDrive\Bureau\Thesis submission files\Alteryx\Countries AA_polygon\World_Countries\World_Countries.shp" type="SpatialObj" column="3" />
+                  </RecordInfo>
+                </MetaInfo>
+              </MultiMetaInfo>
+              <ByName_ErrorMode>Warning</ByName_ErrorMode>
+              <ByName_OutputMode>All</ByName_OutputMode>
+              <Mode>ManualDelayed</Mode>
+              <SetOutputOrder value="False" />
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText />
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxUnion" />
+        </Node>
+        <Node ToolID="17">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileInput.DbFileInput">
+            <Position x="79" y="103" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Passwords />
+              <File OutputFileName="" RecordLimit="" SearchSubDirs="False" FileFormat="25">EEZ territories match.xlsx|||`country_territory_match$`</File>
+              <FormatSpecificOptions>
+                <FirstRowData>False</FirstRowData>
+                <ImportLine>1</ImportLine>
+              </FormatSpecificOptions>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>EEZ territories match.xlsx
+Query=`country_territory_match$`</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+            <MetaInfo connection="Output">
+              <RecordInfo>
+                <Field name="Territory" size="255" source="File: C:\Users\nicop\OneDrive\Bureau\Thesis submission files\Alteryx\Countries AA_polygon\EEZ territories match.xlsx|||`country_territory_match$`" type="V_String" />
+                <Field name="Sovereign" size="255" source="File: C:\Users\nicop\OneDrive\Bureau\Thesis submission files\Alteryx\Countries AA_polygon\EEZ territories match.xlsx|||`country_territory_match$`" type="V_String" />
+                <Field name="Country" size="255" source="File: C:\Users\nicop\OneDrive\Bureau\Thesis submission files\Alteryx\Countries AA_polygon\EEZ territories match.xlsx|||`country_territory_match$`" type="V_String" />
+              </RecordInfo>
+            </MetaInfo>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileInput" />
+        </Node>
+        <Node ToolID="16">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.Join.Join">
+            <Position x="270" y="175" />
+          </GuiSettings>
+          <Properties>
+            <Configuration joinByRecordPos="False">
+              <JoinInfo connection="Left">
+                <Field field="Territory" />
+                <Field field="Sovereign" />
+              </JoinInfo>
+              <JoinInfo connection="Right">
+                <Field field="TERRITORY1" />
+                <Field field="SOVEREIGN1" />
+              </JoinInfo>
+              <SelectConfiguration>
+                <Configuration outputConnection="Join">
+                  <OrderChanged value="False" />
+                  <CommaDecimal value="False" />
+                  <SelectFields>
+                    <SelectField field="Right_MRGID" selected="False" input="Right_" />
+                    <SelectField field="Right_GEONAME" selected="False" input="Right_" />
+                    <SelectField field="Right_MRGID_TER1" selected="False" input="Right_" />
+                    <SelectField field="Right_POL_TYPE" selected="False" input="Right_" />
+                    <SelectField field="Right_MRGID_SOV1" selected="False" input="Right_" />
+                    <SelectField field="Right_TERRITORY1" selected="False" rename="Right_TERRITORY1" input="Right_" />
+                    <SelectField field="Right_ISO_TER1" selected="False" input="Right_" />
+                    <SelectField field="Right_SOVEREIGN1" selected="False" rename="Right_SOVEREIGN1" input="Right_" />
+                    <SelectField field="Right_MRGID_TER2" selected="False" input="Right_" />
+                    <SelectField field="Right_MRGID_SOV2" selected="False" input="Right_" />
+                    <SelectField field="Right_TERRITORY2" selected="False" input="Right_" />
+                    <SelectField field="Right_ISO_TER2" selected="False" input="Right_" />
+                    <SelectField field="Right_SOVEREIGN2" selected="False" input="Right_" />
+                    <SelectField field="Right_MRGID_TER3" selected="False" input="Right_" />
+                    <SelectField field="Right_MRGID_SOV3" selected="False" input="Right_" />
+                    <SelectField field="Right_TERRITORY3" selected="False" input="Right_" />
+                    <SelectField field="Right_ISO_TER3" selected="False" input="Right_" />
+                    <SelectField field="Right_SOVEREIGN3" selected="False" input="Right_" />
+                    <SelectField field="Right_X_1" selected="False" input="Right_" />
+                    <SelectField field="Right_Y_1" selected="False" input="Right_" />
+                    <SelectField field="Right_MRGID_EEZ" selected="False" input="Right_" />
+                    <SelectField field="Right_AREA_KM2" selected="False" input="Right_" />
+                    <SelectField field="Right_ISO_SOV1" selected="False" input="Right_" />
+                    <SelectField field="Right_ISO_SOV2" selected="False" input="Right_" />
+                    <SelectField field="Right_ISO_SOV3" selected="False" input="Right_" />
+                    <SelectField field="Right_UN_SOV1" selected="False" input="Right_" />
+                    <SelectField field="Right_UN_SOV2" selected="False" input="Right_" />
+                    <SelectField field="Right_UN_SOV3" selected="False" input="Right_" />
+                    <SelectField field="Right_UN_TER1" selected="False" input="Right_" />
+                    <SelectField field="Right_UN_TER2" selected="False" input="Right_" />
+                    <SelectField field="Right_UN_TER3" selected="False" input="Right_" />
+                    <SelectField field="Left_MRGID" selected="False" input="Left_" />
+                    <SelectField field="Left_GEONAME" selected="False" input="Left_" />
+                    <SelectField field="Left_MRGID_TER1" selected="False" input="Left_" />
+                    <SelectField field="Left_POL_TYPE" selected="False" input="Left_" />
+                    <SelectField field="Left_MRGID_SOV1" selected="False" input="Left_" />
+                    <SelectField field="Left_TERRITORY1" selected="False" rename="Territory" input="Left_" />
+                    <SelectField field="Left_ISO_TER1" selected="False" input="Left_" />
+                    <SelectField field="Left_SOVEREIGN1" selected="False" input="Left_" />
+                    <SelectField field="Left_MRGID_TER2" selected="False" input="Left_" />
+                    <SelectField field="Left_MRGID_SOV2" selected="False" input="Left_" />
+                    <SelectField field="Left_TERRITORY2" selected="False" input="Left_" />
+                    <SelectField field="Left_ISO_TER2" selected="False" input="Left_" />
+                    <SelectField field="Left_SOVEREIGN2" selected="False" input="Left_" />
+                    <SelectField field="Left_MRGID_TER3" selected="False" input="Left_" />
+                    <SelectField field="Left_MRGID_SOV3" selected="False" input="Left_" />
+                    <SelectField field="Left_TERRITORY3" selected="False" input="Left_" />
+                    <SelectField field="Left_ISO_TER3" selected="False" input="Left_" />
+                    <SelectField field="Left_SOVEREIGN3" selected="False" input="Left_" />
+                    <SelectField field="Left_X_1" selected="False" input="Left_" />
+                    <SelectField field="Left_Y_1" selected="False" input="Left_" />
+                    <SelectField field="Left_MRGID_EEZ" selected="False" input="Left_" />
+                    <SelectField field="Left_AREA_KM2" selected="False" input="Left_" />
+                    <SelectField field="Left_ISO_SOV1" selected="False" input="Left_" />
+                    <SelectField field="Left_ISO_SOV2" selected="False" input="Left_" />
+                    <SelectField field="Left_ISO_SOV3" selected="False" input="Left_" />
+                    <SelectField field="Left_UN_SOV1" selected="False" input="Left_" />
+                    <SelectField field="Left_UN_SOV2" selected="False" input="Left_" />
+                    <SelectField field="Left_UN_SOV3" selected="False" input="Left_" />
+                    <SelectField field="Left_UN_TER1" selected="False" input="Left_" />
+                    <SelectField field="Left_UN_TER2" selected="False" input="Left_" />
+                    <SelectField field="Left_UN_TER3" selected="False" input="Left_" />
+                    <SelectField field="*Unknown" selected="True" />
+                  </SelectFields>
+                </Configuration>
+              </SelectConfiguration>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText />
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxJoin" />
+        </Node>
+        <Node ToolID="6">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.Join.Join">
+            <Position x="342" y="187" />
+          </GuiSettings>
+          <Properties>
+            <Configuration joinByRecordPos="False">
+              <JoinInfo connection="Left">
+                <Field field="Country" />
+              </JoinInfo>
+              <JoinInfo connection="Right">
+                <Field field="COUNTRY" />
+              </JoinInfo>
+              <SelectConfiguration>
+                <Configuration outputConnection="Join">
+                  <OrderChanged value="False" />
+                  <CommaDecimal value="False" />
+                  <SelectFields>
+                    <SelectField field="Left_Territory" selected="False" input="Left_" />
+                    <SelectField field="Left_Sovereign" selected="False" input="Left_" />
+                    <SelectField field="Left_SpatialObj" selected="True" rename="EEZ" input="Left_" />
+                    <SelectField field="Right_COUNTRY" selected="False" rename="Right_COUNTRY" input="Right_" />
+                    <SelectField field="Right_SpatialObj" selected="True" rename="LAND" input="Right_" />
+                    <SelectField field="Left_MRGID" selected="False" input="Left_" />
+                    <SelectField field="Left_GEONAME" selected="False" input="Left_" />
+                    <SelectField field="Left_MRGID_TER1" selected="False" input="Left_" />
+                    <SelectField field="Left_POL_TYPE" selected="False" input="Left_" />
+                    <SelectField field="Left_MRGID_SOV1" selected="False" input="Left_" />
+                    <SelectField field="Left_ISO_TER1" selected="False" input="Left_" />
+                    <SelectField field="Left_MRGID_TER2" selected="False" input="Left_" />
+                    <SelectField field="Left_MRGID_SOV2" selected="False" input="Left_" />
+                    <SelectField field="Left_TERRITORY2" selected="False" input="Left_" />
+                    <SelectField field="Left_ISO_TER2" selected="False" input="Left_" />
+                    <SelectField field="Left_SOVEREIGN2" selected="False" input="Left_" />
+                    <SelectField field="Left_MRGID_TER3" selected="False" input="Left_" />
+                    <SelectField field="Left_MRGID_SOV3" selected="False" input="Left_" />
+                    <SelectField field="Left_TERRITORY3" selected="False" input="Left_" />
+                    <SelectField field="Left_ISO_TER3" selected="False" input="Left_" />
+                    <SelectField field="Left_SOVEREIGN3" selected="False" input="Left_" />
+                    <SelectField field="Left_X_1" selected="False" input="Left_" />
+                    <SelectField field="Left_Y_1" selected="False" input="Left_" />
+                    <SelectField field="Left_MRGID_EEZ" selected="False" input="Left_" />
+                    <SelectField field="Left_AREA_KM2" selected="False" input="Left_" />
+                    <SelectField field="Left_ISO_SOV1" selected="False" input="Left_" />
+                    <SelectField field="Left_ISO_SOV2" selected="False" input="Left_" />
+                    <SelectField field="Left_ISO_SOV3" selected="False" input="Left_" />
+                    <SelectField field="Left_UN_SOV1" selected="False" input="Left_" />
+                    <SelectField field="Left_UN_SOV2" selected="False" input="Left_" />
+                    <SelectField field="Left_UN_SOV3" selected="False" input="Left_" />
+                    <SelectField field="Left_UN_TER1" selected="False" input="Left_" />
+                    <SelectField field="Left_UN_TER2" selected="False" input="Left_" />
+                    <SelectField field="Left_UN_TER3" selected="False" input="Left_" />
+                    <SelectField field="*Unknown" selected="True" />
+                  </SelectFields>
+                </Configuration>
+              </SelectConfiguration>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText />
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxJoin" />
+        </Node>
+        <Node ToolID="5">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileInput.DbFileInput">
+            <Position x="367" y="260" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Passwords />
+              <File OutputFileName="" RecordLimit="" SearchSubDirs="False" FileFormat="12">C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\1_World_Countries\World_Countries.shp</File>
+              <FormatSpecificOptions>
+                <Projection />
+                <AllStrings>False</AllStrings>
+              </FormatSpecificOptions>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>World_Countries.shp</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+            <Dependencies>
+              <Implicit />
+            </Dependencies>
+            <MetaInfo connection="Output">
+              <RecordInfo>
+                <Field name="COUNTRY" size="100" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\1_World_Countries\World_Countries.shp" type="V_WString" />
+                <Field name="SpatialObj" size="2147483647" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\1_World_Countries\World_Countries.shp" type="SpatialObj" />
+              </RecordInfo>
+            </MetaInfo>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileInput" />
+        </Node>
+        <Node ToolID="2">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileInput.DbFileInput">
+            <Position x="79" y="188" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Passwords />
+              <File OutputFileName="" RecordLimit="" SearchSubDirs="False" FileFormat="12">C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp</File>
+              <FormatSpecificOptions>
+                <Projection />
+                <AllStrings>False</AllStrings>
+              </FormatSpecificOptions>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>eez_v11.shp</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+            <Dependencies>
+              <Implicit />
+            </Dependencies>
+            <MetaInfo connection="Output">
+              <RecordInfo>
+                <Field name="MRGID" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="Int64" />
+                <Field name="GEONAME" size="80" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="V_WString" />
+                <Field name="MRGID_TER1" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="Int64" />
+                <Field name="POL_TYPE" size="80" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="V_WString" />
+                <Field name="MRGID_SOV1" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="Int64" />
+                <Field name="TERRITORY1" size="80" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="V_WString" />
+                <Field name="ISO_TER1" size="80" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="V_WString" />
+                <Field name="SOVEREIGN1" size="80" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="V_WString" />
+                <Field name="MRGID_TER2" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="Int64" />
+                <Field name="MRGID_SOV2" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="Int64" />
+                <Field name="TERRITORY2" size="80" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="V_WString" />
+                <Field name="ISO_TER2" size="80" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="V_WString" />
+                <Field name="SOVEREIGN2" size="80" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="V_WString" />
+                <Field name="MRGID_TER3" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="Int64" />
+                <Field name="MRGID_SOV3" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="Int64" />
+                <Field name="TERRITORY3" size="80" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="V_WString" />
+                <Field name="ISO_TER3" size="80" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="V_WString" />
+                <Field name="SOVEREIGN3" size="80" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="V_WString" />
+                <Field name="X_1" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="Double" />
+                <Field name="Y_1" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="Double" />
+                <Field name="MRGID_EEZ" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="Int64" />
+                <Field name="AREA_KM2" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="Int64" />
+                <Field name="ISO_SOV1" size="80" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="V_WString" />
+                <Field name="ISO_SOV2" size="80" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="V_WString" />
+                <Field name="ISO_SOV3" size="80" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="V_WString" />
+                <Field name="UN_SOV1" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="Int32" />
+                <Field name="UN_SOV2" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="Int32" />
+                <Field name="UN_SOV3" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="Int32" />
+                <Field name="UN_TER1" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="Int32" />
+                <Field name="UN_TER2" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="Int32" />
+                <Field name="UN_TER3" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="Int32" />
+                <Field name="SpatialObj" size="2147483647" source="File: C:\Users\etber\OneDrive\Nitrogen_Paper\SI_1\0_External_data\3_Polygon_shapes\2_World_EEZ_v11\eez_v11.shp" type="SpatialObj" />
+              </RecordInfo>
+            </MetaInfo>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileInput" />
+        </Node>
+      </ChildNodes>
+    </Node>
+    <Node ToolID="45">
+      <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
+        <Position x="1146" y="271" width="385" height="195" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Caption>Get the area of the subsegments</Caption>
+          <Style TextColor="#314c4a" FillColor="#ecf2f2" BorderColor="#314c4a" Transparency="25" Margin="25" />
+          <Disabled value="False" />
+          <Folded value="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <ChildNodes>
+        <Node ToolID="35">
+          <GuiSettings Plugin="AlteryxSpatialPluginsGui.SpatialInfo.SpatialInfo">
+            <Position x="1303" y="320" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <SpatialObj field="SpatialObjCombine_IntersectPoly" />
+              <SelectedItems>
+                <Item name="AreaKm" />
+              </SelectedItems>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText />
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxSpatialPluginsEngine.dll" EngineDllEntryPoint="AlteryxSpatialInfo" />
+        </Node>
+        <Node ToolID="36">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.AlteryxSelect.AlteryxSelect">
+            <Position x="1447" y="320" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <OrderChanged value="False" />
+              <CommaDecimal value="False" />
+              <SelectFields>
+                <SelectField field="LME_subsegment" selected="True" />
+                <SelectField field="LME_area" selected="True" />
+                <SelectField field="Country" selected="True" />
+                <SelectField field="AreaSqKm" selected="True" rename="LME_country_area" />
+                <SelectField field="*Unknown" selected="False" />
+              </SelectFields>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText />
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxSelect" />
+        </Node>
+        <Node ToolID="39">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.Sort.Sort">
+            <Position x="1171" y="320" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <SortInfo locale="1033">
+                <Field field="LME_subsegment" order="Ascending" />
+                <Field field="Country" order="Ascending" />
+              </SortInfo>
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>LME_subsegment - Ascending
+Country - Ascending</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxSort" />
+        </Node>
+      </ChildNodes>
+    </Node>
+    <Node ToolID="44">
+      <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
+        <Position x="1890" y="259" width="155" height="165" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Caption>Container 22</Caption>
+          <Style TextColor="#314c4a" FillColor="#ecf2f2" BorderColor="#314c4a" Transparency="25" Margin="25" />
+          <Disabled value="False" />
+          <Folded value="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <ChildNodes>
+        <Node ToolID="43">
+          <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileOutput.DbFileOutput">
+            <Position x="1915" y="308" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <File MaxRecords="" FileFormat="0">LME_country_match.csv</File>
+              <Passwords />
+              <Disable>False</Disable>
+              <FormatSpecificOptions>
+                <LineEndStyle>CRLF</LineEndStyle>
+                <Delimeter>,</Delimeter>
+                <ForceQuotes>False</ForceQuotes>
+                <HeaderRow>True</HeaderRow>
+                <CodePage>28591</CodePage>
+                <WriteBOM>True</WriteBOM>
+              </FormatSpecificOptions>
+              <MultiFile value="False" />
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText>LME_country_match.csv</DefaultAnnotationText>
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileOutput" />
+        </Node>
+      </ChildNodes>
+    </Node>
+  </Nodes>
+  <Connections>
+    <Connection>
+      <Origin ToolID="23" Connection="Output" />
+      <Destination ToolID="32" Connection="Universe" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="29" Connection="Output" />
+      <Destination ToolID="32" Connection="Targets" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="23" Connection="Output" />
+      <Destination ToolID="47" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="28" Connection="Output" />
+      <Destination ToolID="31" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="31" Connection="Output" />
+      <Destination ToolID="29" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="32" Connection="Matched" />
+      <Destination ToolID="34" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="34" Connection="Output" />
+      <Destination ToolID="39" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="37" Connection="Output" />
+      <Destination ToolID="38" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="38" Connection="Output" />
+      <Destination ToolID="43" Connection="Input" />
+    </Connection>
+    <Connection name="#1">
+      <Origin ToolID="18" Connection="Output" />
+      <Destination ToolID="20" Connection="Input" />
+    </Connection>
+    <Connection name="#2">
+      <Origin ToolID="6" Connection="Right" />
+      <Destination ToolID="20" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="20" Connection="Output" />
+      <Destination ToolID="23" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="17" Connection="Output" />
+      <Destination ToolID="16" Connection="Left" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="2" Connection="Output" />
+      <Destination ToolID="16" Connection="Right" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="16" Connection="Join" />
+      <Destination ToolID="6" Connection="Left" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="5" Connection="Output" />
+      <Destination ToolID="6" Connection="Right" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="6" Connection="Join" />
+      <Destination ToolID="18" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="35" Connection="Output" />
+      <Destination ToolID="36" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="36" Connection="Output" />
+      <Destination ToolID="37" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="39" Connection="Output" />
+      <Destination ToolID="35" Connection="Input" />
+    </Connection>
+  </Connections>
+  <Properties>
+    <Memory default="True" />
+    <GlobalRecordLimit value="0" />
+    <TempFiles default="True" />
+    <Annotation on="True" includeToolName="False" />
+    <ConvErrorLimit value="10" />
+    <ConvErrorLimit_Stop value="False" />
+    <CancelOnError value="False" />
+    <DisableBrowse value="False" />
+    <EnablePerformanceProfiling value="False" />
+    <RunWithE2 value="True" />
+    <DefaultTZ value="Local" />
+    <PredictiveToolsCodePage value="1252" />
+    <DisableAllOutput value="False" />
+    <ShowAllMacroMessages value="False" />
+    <ShowConnectionStatusIsOn value="True" />
+    <ShowConnectionStatusOnlyWhenRunning value="True" />
+    <ZoomLevel value="0" />
+    <LayoutType>Horizontal</LayoutType>
+    <IsTemplate value="False" />
+    <MetaInfo>
+      <NameIsFileName value="True" />
+      <Name>0_1_Countries_EEZ_extension</Name>
+      <Description />
+      <RootToolName />
+      <ToolVersion />
+      <ToolInDb value="False" />
+      <CategoryName />
+      <SearchTags />
+      <Author />
+      <Company />
+      <Copyright />
+      <DescriptionLink actual="" displayed="" />
+      <Example>
+        <Description />
+        <File />
+      </Example>
+      <WorkflowId value="c7c29366-936e-400e-91ff-069a5b2c5897" />
+      <Telemetry>
+        <PreviousWorkflowId value="4aeb0499-e613-469b-99bf-add9105c57fa" />
+        <OriginWorkflowId value="4aeb0499-e613-469b-99bf-add9105c57fa" />
+      </Telemetry>
+      <PlatformWorkflowId value="" />
+    </MetaInfo>
+    <Events>
+      <Enabled value="True" />
+    </Events>
+  </Properties>
+</AlteryxDocument>

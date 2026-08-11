@@ -143,3 +143,26 @@ _cfmap = pd.DataFrame({"Cell_ID": zz + 1, "lat": LAT, "lon": LON, "LME_nb_f_1": 
 _cfmap = _cfmap[_cfmap["CF_kgO2_per_kg"] > 0]
 _cfmap.to_csv(os.path.join(NH3_DIR, "NH3_CF_receptor_map.csv"), index=False)
 print("CF summaries -> NH3_CF_by_LME.csv (per LME), NH3_CF_receptor_map.csv (per cell)")
+
+# ---- A5e) allocate impact to RECEPTOR countries (whose EEZ makes up each LME) ----
+#   Validated LME_country_match.csv (0_shape_files/5_LME_Country_match). Air LME labels suffix
+#   single-segment LMEs as 'X_0' while the shp/match use bare 'X', so strip a trailing '_0' before
+#   joining. Disputed LMEs (portions sum >1) are renormalised to 1; unclaimed (sum<1) -> ABNJ.
+_MATCH = os.path.join(os.path.dirname(NH3_DIR), "0_shape_files", "5_LME_Country_match", "LME_country_match.csv")
+lme_ctry = pd.read_csv(_MATCH).rename(columns={"LME_subsegment": "LME_join", "Country": "receptor_country", "LME_area_portion": "area_portion"})
+lme_psum = lme_ctry.groupby("LME_join", as_index=False)["area_portion"].sum().rename(columns={"area_portion": "portion_sum"})
+_mn = main.copy()
+_mn["LME_join"] = _mn["LME_nb_f_1"].astype(str).str.replace(r"_0$", "", regex=True)
+_rec = _mn.merge(lme_ctry, on="LME_join", how="inner").merge(lme_psum, on="LME_join", how="left")
+_rec["impact_kgO2"] = _rec["impact_kgO2"] * _rec["area_portion"] / _rec["portion_sum"].clip(lower=1.0)
+_res = _mn.merge(lme_psum, on="LME_join", how="left")
+_res["portion_sum"] = _res["portion_sum"].fillna(0.0)
+_res["receptor_country"] = "High seas (ABNJ)"
+_res["impact_kgO2"] = _res["impact_kgO2"] * (1.0 - _res["portion_sum"]).clip(lower=0.0)
+_cc = ["year", "IPCC_sector", "emission_country", "LME_nb_f_1", "receptor_country", "impact_kgO2"]
+recept = pd.concat([_rec[_cc], _res[_cc]], ignore_index=True)
+recept = recept[recept["impact_kgO2"] > 0]
+recept.to_csv(os.path.join(NH3_DIR, "NH3_impact_emitter_LME_receptor.csv"), index=False)
+by_receptor = recept.groupby(["year", "receptor_country"], as_index=False)["impact_kgO2"].sum().sort_values(["year", "impact_kgO2"], ascending=[True, False])
+by_receptor.to_csv(os.path.join(NH3_DIR, "NH3_impact_by_receptor_country.csv"), index=False)
+print("A5e receptor allocation: %d rows | total %.4e kg O2 | ABNJ %.4e (%.1f%%)" % (len(recept), recept["impact_kgO2"].sum(), _res["impact_kgO2"].sum(), 100*_res["impact_kgO2"].sum()/max(recept["impact_kgO2"].sum(),1e-30)))
