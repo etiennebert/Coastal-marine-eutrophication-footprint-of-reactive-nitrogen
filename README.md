@@ -59,7 +59,11 @@ Supporting_Information/
 │   ├── 3. Output/                     all NOₓ results (generated)
 │   └── NOx_EDGAR_2015_2022.parquet    prepared emission database (generated)
 │
-├── D_Eutrophication_and_sensitivity_check/   sensitivity checks (placeholder)
+├── D_Final_Database/                  FINAL harmonised database
+│   ├── 0_harmonise_pathways.py        READ-ONLY stack of crop, grazing, NH₃, NOₓ at
+│   │                                  country × activity × LME (release_kg, release_kgN,
+│   │                                  effective CF, eutrophication_kgO2)
+│   └── eutrophication_all_pathways.parquet   (generated)
 │
 └── E_MRIO_GLORIA_Sattelites/          MRIO allocation to final consumption
     ├── 1. Nitrogen/                   waterborne-N satellite + results
@@ -135,10 +139,13 @@ Folder E contains the input–output allocation to final consumption. It is buil
 in **Alteryx** (`.yxdb` databases and workflows), not Python, and is included
 here as data/workflow provenance.
 
-### D — Sensitivity checks
+### D — Final database
 
-Placeholder for the eutrophication cross-checks and sensitivity analysis
-(currently empty).
+`0_harmonise_pathways.py` reads the pathway outputs (A, B, C — nothing is modified)
+and stacks them into `eutrophication_all_pathways.parquet`: one row per year ×
+pathway × emission country × activity (crop / grazing / IPCC sector) × LME, with
+the release in native mass and as kg N, the effective CF, and the eutrophication
+in kg O₂. Run it after the A/B/C pipelines.
 
 ---
 
