@@ -13,6 +13,25 @@ NOTE: CF_NHx is per kg NH3 EMITTED (the MATLAB normalises by emission_nhx), so E
 NH3 is fed straight in (tonnes -> kg), no N conversion -- exactly as for NOx.
 Requires: numpy, pandas, geopandas, rasterio.
 """
+# ---------------------------------------------------------------------------
+# PIPELINE OVERVIEW  (documented in the same review style as the agricultural scripts;
+#                     '# %%' cells -> run step by step in Spyder, top to bottom)
+#   1) EEZ-land union -> 0.1 deg COUNTRY grid                    (who emitted)
+#   2) EDGAR 0.1 deg points -> emitter country + CF-grid cell z  -> DB1
+#   3) receptor cells -> LME weights M; ONE streamed pass over the
+#      13,104 x 13,104 CF matrix:  CF_to_LME = CF @ M            -> DB2 (per year)
+#   4) eutrophication per (year, sector, emitter country) x LME  -> main tables
+#   5) inland-gap check, per-receptor-cell maps, aggregate CF layers
+#   6) A5e: LME -> receptor-country split (validated EEZ coverage shares)
+#
+# THREE GRIDS -- keep them apart while reviewing:
+#   0.1 deg (3600x1800): EDGAR emissions + the rasterized country layer;
+#   ~2 x 2.5 deg (91x144 = 13,104 cells, flat id z; 1-based Cell_ID in outputs):
+#       the atmospheric CF grid. CAREFUL: z counts row 0 from the SOUTH pole
+#       ((lat+90) ascending) -- the OPPOSITE of the agricultural fid (90-lat);
+#   vector LME sub-segments (labels like '22_3'; single-segment LMEs appear as 'X_0').
+# ---------------------------------------------------------------------------
+# %% imports + paths  (nothing to edit - every path is relative to THIS file)
 import numpy as np, pandas as pd, geopandas as gpd
 from rasterio import features
 from rasterio.transform import from_origin
@@ -22,29 +41,73 @@ try:
     NH3_DIR = os.path.dirname(os.path.abspath(__file__))   # B_airborne_NH3 folder
 except NameError:
     NH3_DIR = os.getcwd()
-EDGAR   = NH3_DIR + r"\NH3_EDGAR_2015_2022.csv"          # <-- you provide (same columns as NOx)
-CF_FILE = NH3_DIR + r"\CF_NHx_all.csv"                    # <-- you provide (run CF_NHx.m)
-MAP_FILE= NH3_DIR + r"\0_gridcells_LME_mapped.csv"        # reused (copied)
-EEZ_SHP = NH3_DIR + r"\EEZ_land_union_v3_202003\EEZ_Land_v3_202030.shp"   # reused (copied)
-OUT_MAIN= NH3_DIR + r"\NH3_impact_country_to_LME.csv"
-OUT_COUN= NH3_DIR + r"\NH3_impact_by_country_sector.csv"
-OUT_LME = NH3_DIR + r"\NH3_impact_by_LME_sector.csv"
+# ---- INPUT / OUTPUT locations (rename-proof: the first existing candidate wins) ----
+#   Shared layers live in ..\0_shape_files (common to agriculture and BOTH air scripts);
+#   per-pathway data sit in the numbered subfolders; every output goes to "3. Output".
+def _first(cands, what):
+    for c in cands:
+        if os.path.exists(c):
+            return c
+    raise FileNotFoundError(what + " not found; tried:\n  " + "\n  ".join(cands))
+SHAPES  = os.path.join(os.path.dirname(NH3_DIR), "0_shape_files")
+EDGAR   = _first([os.path.join(NH3_DIR, "NH3_EDGAR_2015_2022.parquet"),   # compact db (0_prepare_EDGAR_emissions.py)
+                  os.path.join(NH3_DIR, "NH3_EDGAR_2015_2022.csv"),       # legacy csv at the folder root
+                  os.path.join(NH3_DIR, "1. EDGARv8.1_NH3emissions", "NH3_EDGAR_2015_2022.csv"),   # ...or moved next to the raw files
+                  os.path.join(NH3_DIR, "0. Old", "NH3_EDGAR_2015_2022.csv")],   # ...or archived
+                 "EDGAR NH3 database")
+CF_FILE = _first([os.path.join(NH3_DIR, "2. CFs", "CF_NHx_all.csv"),
+                  os.path.join(NH3_DIR, "CF_NHx_all.csv")], "CF_NHx_all.csv")
+MAP_FILE= _first([os.path.join(SHAPES, "0_gridcells_LME_mapped.csv"),          # SHARED copy
+                  os.path.join(NH3_DIR, "0_gridcells_LME_mapped.csv")], "0_gridcells_LME_mapped.csv")
+EEZ_SHP = _first([os.path.join(SHAPES, "6_EEZ_land_union_v3_202003", "EEZ_Land_v3_202030.shp"),   # SHARED copy
+                  os.path.join(NH3_DIR, "EEZ_land_union_v3_202003", "EEZ_Land_v3_202030.shp")],
+                 "EEZ_Land_v3_202030.shp")
+NH3_OUT = os.path.join(NH3_DIR, "3. Output")
+os.makedirs(NH3_OUT, exist_ok=True)
+OUT_MAIN= os.path.join(NH3_OUT, "NH3_impact_country_to_LME.csv")
+OUT_COUN= os.path.join(NH3_OUT, "NH3_impact_by_country_sector.csv")
+OUT_LME = os.path.join(NH3_OUT, "NH3_impact_by_LME_sector.csv")
+print("input db:", os.path.basename(EDGAR), "| outputs ->", NH3_OUT)
 
 NLAT, NLON = 91, 144
 N = NLAT * NLON
 TONNES_TO_KG = 1.0e3
 COUNTRY_FIELD = "SOVEREIGN1"
 
-# 1) rasterize EEZ-land union -> 0.1 deg country-index grid
+# %% 1) GEO-STEP 1 of 2 : rasterize the EEZ-land union -> 0.1 deg COUNTRY-index grid
+#   WHY : tags every emission with its EMITTER country. The EEZ-LAND UNION (not a land-only
+#         map) is used so over-water emissions - shipping lanes, offshore platforms - still
+#         belong to a coastal state's zone; only true open ocean falls outside every polygon.
+#   HOW : polygon k is burnt as the integer k+1 into a 1800x3600 grid (0.1 deg; row 0 at 90N,
+#         col 0 at 180W). fill=0 marks 'no polygon', so after the -1 shift in step 2,
+#         pidx < 0  ==  open ocean  ->  'High seas (ABNJ)'.
+#   NOTE: rasterizing ONCE replaces ~80M point-in-polygon tests; at 0.1 deg the worst border
+#         error (~5 km) is far below the ~2 deg CF grid this feeds.
 g = gpd.read_file(EEZ_SHP)
 sov = g[COUNTRY_FIELD].fillna("High seas (ABNJ)").values
 tr = from_origin(-180, 90, 0.1, 0.1)
 rast = features.rasterize(((geom, i + 1) for i, geom in enumerate(g.geometry)),
                           out_shape=(1800, 3600), transform=tr, fill=0, dtype="int32")
 
-# 2) read EDGAR in CHUNKS -> air-cell z + emission country -> bin
+# %% 2) GEO-STEP 2 of 2 : EDGAR 0.1 deg points -> emitter country + CF-grid cell z
+#   WHY : the CF matrix lives on the 91x144 grid, so every EDGAR point is binned to its cell
+#         z. COUNTRY is looked up FIRST, at native 0.1 deg, so a 2 deg cell straddling a
+#         border keeps each country's emissions separate ( (z, country) pairs ).
+#   HOW : z = a*NLON + b flattens (row, col) to one integer - same trick as fid/cid in the
+#         agricultural scripts (but row 0 = SOUTH pole here, see header).
+#   CHUNKS: the CSV is ~3.2 GB / ~80M rows; 5M-row chunks + a groupby per chunk keep memory
+#         flat, and the final groupby re-sums pairs split across chunk boundaries.
 parts = []
-for df in pd.read_csv(EDGAR, usecols=["Year", "lat", "lon", "IPCC", "emission"], chunksize=5_000_000):
+def _edgar_chunks(path, n=5_000_000):
+    # stream the emission database: Parquet (pyarrow batches) or the legacy CSV - same chunks either way
+    if path.lower().endswith(".parquet"):
+        import pyarrow.parquet as _pq
+        for _b in _pq.ParquetFile(path).iter_batches(batch_size=n, columns=["Year", "lat", "lon", "IPCC", "emission"]):
+            yield _b.to_pandas()
+    else:
+        for _c in pd.read_csv(path, usecols=["Year", "lat", "lon", "IPCC", "emission"], chunksize=n):
+            yield _c
+for df in _edgar_chunks(EDGAR):
     lat = df["lat"].values; lon = df["lon"].values
     a = np.clip(np.floor((lat + 90) * NLAT / 180).astype(int), 0, NLAT - 1)
     b = np.clip(np.floor((lon + 180) * NLON / 360).astype(int), 0, NLON - 1)
@@ -58,7 +121,29 @@ for df in pd.read_csv(EDGAR, usecols=["Year", "lat", "lon", "IPCC", "emission"],
 E = (pd.concat(parts, ignore_index=True)
        .groupby(["year", "sector", "z", "country"], as_index=False)["emis_kg"].sum())
 
-# 3) receptor->LME area-weights, then CF_to_LME = CF @ M (single chunked CF pass)
+# %% DB1) EDGAR emissions x country -- SAVED (one row per year x IPCC sector x air-cell x country).
+#   Cell_ID is 1-based on the 91x144 (~2 deg) air grid, same convention as 0_gridcells_LME_mapped /
+#   the per-cell outputs. The country tag was resolved at EDGAR's native 0.1 deg BEFORE binning, so
+#   one air cell can (correctly) appear with several emission countries.
+_z0 = E["z"].values.astype(int)
+db1 = E.rename(columns={"z": "Cell_ID", "sector": "IPCC_sector", "country": "emission_country", "emis_kg": "NH3_emission_kg"}).copy()
+db1["Cell_ID"] = db1["Cell_ID"] + 1
+db1.insert(2, "lat", (_z0 // NLON + 0.5) * 180.0 / NLAT - 90.0)
+db1.insert(3, "lon", (_z0 %  NLON + 0.5) * 360.0 / NLON - 180.0)
+db1 = db1[["year", "Cell_ID", "lat", "lon", "emission_country", "IPCC_sector", "NH3_emission_kg"]]
+db1.to_csv(os.path.join(NH3_OUT, "NH3_DB1_emissions_cell_country_sector.csv"), index=False)
+print("DB1 -> NH3_DB1_emissions_cell_country_sector.csv (%d rows, %.4e kg NH3)" % (len(db1), db1["NH3_emission_kg"].sum()))
+
+# %% 3) receptor -> LME weights M, then ONE streamed pass over the CF matrix
+#   M   : a ~2 deg receptor cell can straddle several LME sub-segments, so its deposition is
+#         split by intersected area: w = AreaSqKm / sum(AreaSqKm per Cell_ID). M is
+#         [13,104 x n_LME]; rows of zeros = inland / unmapped cells touching no LME.
+#   CFL : row z of CF = kg O2 in EACH receptor cell per kg emitted in z; CFL = CF @ M turns
+#         that into kg O2 in EACH LME per kg emitted in z. Collapsing receptors early
+#         (13,104 -> 305 columns) is what lets everything downstream fit in memory.
+#   STREAM: the matrix CSV is ~2.5 GB, so it is read once in 2000-row chunks; each chunk
+#         also feeds rowsum (ALL receptors incl. inland - the gap check), colsum (per-
+#         receptor CF summed over sources) and the per-year receptor impact maps.
 m = pd.read_csv(MAP_FILE)
 m["w"] = m["AreaSqKm"] / m.groupby("Cell_ID")["AreaSqKm"].transform("sum")
 labels = np.array(sorted(m["LME_nb_f_1"].unique())); Ln = len(labels)
@@ -84,7 +169,37 @@ for ch in pd.read_csv(CF_FILE, header=None, dtype=np.float32, chunksize=2000):
     colsum += blk.sum(axis=0)
     r0 += k
 
-# 4) combine -> impact per (year, sector, country, LME) + marginals
+# %% DB2) emission-cell -> LME database, one file per year: each emitting air cell, every LME it
+#   impacts, the collapsed CF (kg O2 per kg NH3 emitted, into that LME) and the eutrophication.
+#   Receptor kept at LME level ON PURPOSE: the raw source->receptor matrix is ~85%% dense
+#   (13,104 x 13,104), so a cell->cell pair table would be ~1e9 rows of mostly negligible
+#   far-field values. Rows are country- and sector-summed per cell; join DB1 on (year, Cell_ID)
+#   for that detail. Only LME-mapped (coastal) receptors are included, consistent with 'main';
+#   the inland/unmapped share is reported separately by the gap printout.
+_zz2 = np.arange(N)
+_lat2 = (_zz2 // NLON + 0.5) * 180.0 / NLAT - 90.0
+_lon2 = (_zz2 %  NLON + 0.5) * 360.0 / NLON - 180.0
+for _Y in years_sorted:
+    _ev = evec_year[_Y]
+    _src = np.nonzero(_ev > 0)[0]
+    _imp = _ev[_src, None] * CFL[_src]            # (n_src, n_LME) eutrophication, kg O2
+    _si, _li = np.nonzero(_imp > 0)
+    _db2 = pd.DataFrame({"year": _Y, "Cell_ID": _src[_si] + 1,
+                         "lat": _lat2[_src[_si]], "lon": _lon2[_src[_si]],
+                         "LME_nb_f_1": labels[_li],
+                         "NH3_emission_kg": _ev[_src[_si]],
+                         "CF_to_LME_kgO2_per_kg": CFL[_src[_si], _li],
+                         "eutrophication_kgO2": _imp[_si, _li]})
+    _db2.to_csv(os.path.join(NH3_OUT, "NH3_DB2_cell_to_LME_%d.csv" % _Y), index=False)
+    print("DB2 %d -> NH3_DB2_cell_to_LME_%d.csv (%d rows, %.4e kg O2)" % (_Y, _Y, len(_db2), _db2["eutrophication_kgO2"].sum()))
+
+# %% 4) eutrophication per (year, IPCC sector, emitter country) x LME
+#   contrib : row g of E emits emis_kg in cell z -> emis * CFL[z, :] = its kg O2 per LME.
+#   GROUPING: (year, sector, country) is packed into ONE integer (gcomb - the flatten trick
+#         again) and np.add.at sums the LME columns per group: a pivot table without ever
+#         building the full frame.
+#   main  : long table year x sector x emitter x LME, with emission_kg and the EFFECTIVE
+#         CF = impact / emission (a RESULT ratio; the raw CF stays in the matrix).
 zc = E["z"].values; emis = E["emis_kg"].values
 contrib = emis[:, None] * CFL[zc]
 yc, yu = pd.factorize(E["year"]); sc, su = pd.factorize(E["sector"]); cc, cu = pd.factorize(E["country"])
@@ -106,7 +221,10 @@ main.groupby(["year", "IPCC_sector", "LME_nb_f_1"], as_index=False)["impact_kgO2
 print("GLOBAL NH3 impact (country-attributed) = %.4e kg O2" % main["impact_kgO2"].sum())
 print("rows: country_to_LME=%d  by_country_sector=%d" % (len(main), G))
 
-# ---- inland (unmapped) gap: coastal-mapped LMEs vs ALL receptors ----
+# %% 5a) inland (unmapped) gap : how much deposition never reaches an LME table
+#   rowsum counts ALL receptor cells; 'main' only the LME-mapped (coastal) ones. The
+#   difference = deposition on inland/unmapped cells - printed so the LME tables' coverage
+#   is explicit instead of silent.
 allimp = E["emis_kg"].values * rowsum[E["z"].values]
 tot_all = allimp.sum(); tot_map = main["impact_kgO2"].sum()
 print("mapped (coastal) impact : %.4e kg O2 (%.1f%% of all-receptor impact)" % (tot_map, 100*tot_map/tot_all))
@@ -116,7 +234,10 @@ mby = main.groupby("year")["impact_kgO2"].sum()
 for _y in Eg.index:
     print("   year %d: mapped %.1f%%  inland %.1f%%" % (_y, 100*mby.get(_y,0)/Eg[_y], 100*(Eg[_y]-mby.get(_y,0))/Eg[_y]))
 
-# ---- per-receptor-cell impact map, one file per year (mirrors agricultural per-cell outputs) ----
+# %% 5b) per-receptor-cell impact map, one file per year (mirrors the agricultural per-cell files)
+#   impact_Y(j) = sum over sources z of emis_Y(z) * CF(z, j)  ->  shows WHERE deposition
+#   lands, summed over ALL sources (who caused it lives in DB2 / main). Each receptor cell
+#   is tagged with its DOMINANT LME (largest intersected area; 'mapped' = touches any LME).
 zz = np.arange(N)
 LAT = (zz // NLON + 0.5) * 180.0 / NLAT - 90.0
 LON = (zz %  NLON + 0.5) * 360.0 / NLON - 180.0
@@ -129,22 +250,25 @@ for Y in years_sorted:
                         "LME_nb_f_1": lme_of_cell, "mapped": mapped_cell,
                         "impact_kgO2": cell_impact_year[Y]})
     cdf = cdf[cdf["impact_kgO2"] > 0]
-    cdf.to_csv(os.path.join(NH3_DIR, "NH3_impact_per_cell_%d.csv" % Y), index=False)
+    cdf.to_csv(os.path.join(NH3_OUT, "NH3_impact_per_cell_%d.csv" % Y), index=False)
     _tot = cdf["impact_kgO2"].sum(); _mp = cdf.loc[cdf["mapped"], "impact_kgO2"].sum()
     print("per-cell %d: %d cells, total %.4e kg O2 (mapped coastal %.1f%%)" % (Y, len(cdf), _tot, 100*_mp/_tot if _tot else 0))
 print("per-cell impact maps -> NH3_impact_per_cell_<year>.csv")
 
-# ---- effective CF summaries (keep the CF, like the agricultural CF layer) ----
+# %% 5c) aggregate CF layers (aggregates of the matrix - NOT intrinsic effect factors)
+#   CF_by_LME: column sums of CFL = kg O2 an LME receives per kg emitted, summed over ALL
+#   source cells. CF_receptor_map: the same per receptor cell (colsum). Both depend on the
+#   source grid, so label them as AGGREGATE CFs in the SI.
 CF_LME = CFL.sum(axis=0)   # kg O2 in each LME per kg emitted, summed over all source cells
 pd.DataFrame({"LME_nb_f_1": labels, "CF_sum_over_sources": CF_LME,
-              "CF_mean_per_source": CF_LME / float(N)}).to_csv(os.path.join(NH3_DIR, "NH3_CF_by_LME.csv"), index=False)
+              "CF_mean_per_source": CF_LME / float(N)}).to_csv(os.path.join(NH3_OUT, "NH3_CF_by_LME.csv"), index=False)
 _cfmap = pd.DataFrame({"Cell_ID": zz + 1, "lat": LAT, "lon": LON, "LME_nb_f_1": lme_of_cell,
                        "mapped": mapped_cell, "CF_kgO2_per_kg": colsum})
 _cfmap = _cfmap[_cfmap["CF_kgO2_per_kg"] > 0]
-_cfmap.to_csv(os.path.join(NH3_DIR, "NH3_CF_receptor_map.csv"), index=False)
+_cfmap.to_csv(os.path.join(NH3_OUT, "NH3_CF_receptor_map.csv"), index=False)
 print("CF summaries -> NH3_CF_by_LME.csv (per LME), NH3_CF_receptor_map.csv (per cell)")
 
-# ---- A5e) allocate impact to RECEPTOR countries (whose EEZ makes up each LME) ----
+# %% A5e) LME -> RECEPTOR-country split (whose EEZ makes up each LME)
 #   Validated LME_country_match.csv (0_shape_files/5_LME_Country_match). Air LME labels suffix
 #   single-segment LMEs as 'X_0' while the shp/match use bare 'X', so strip a trailing '_0' before
 #   joining. Disputed LMEs (portions sum >1) are renormalised to 1; unclaimed (sum<1) -> ABNJ.
@@ -162,7 +286,7 @@ _res["impact_kgO2"] = _res["impact_kgO2"] * (1.0 - _res["portion_sum"]).clip(low
 _cc = ["year", "IPCC_sector", "emission_country", "LME_nb_f_1", "receptor_country", "impact_kgO2"]
 recept = pd.concat([_rec[_cc], _res[_cc]], ignore_index=True)
 recept = recept[recept["impact_kgO2"] > 0]
-recept.to_csv(os.path.join(NH3_DIR, "NH3_impact_emitter_LME_receptor.csv"), index=False)
+recept.to_csv(os.path.join(NH3_OUT, "NH3_impact_emitter_LME_receptor.csv"), index=False)
 by_receptor = recept.groupby(["year", "receptor_country"], as_index=False)["impact_kgO2"].sum().sort_values(["year", "impact_kgO2"], ascending=[True, False])
-by_receptor.to_csv(os.path.join(NH3_DIR, "NH3_impact_by_receptor_country.csv"), index=False)
+by_receptor.to_csv(os.path.join(NH3_OUT, "NH3_impact_by_receptor_country.csv"), index=False)
 print("A5e receptor allocation: %d rows | total %.4e kg O2 | ABNJ %.4e (%.1f%%)" % (len(recept), recept["impact_kgO2"].sum(), _res["impact_kgO2"].sum(), 100*_res["impact_kgO2"].sum()/max(recept["impact_kgO2"].sum(),1e-30)))

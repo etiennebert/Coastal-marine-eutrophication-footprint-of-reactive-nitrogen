@@ -14,7 +14,10 @@ import os
 import time
 # run from anywhere: anchor to THIS script folder (A_agricultural_leaching)
 import os
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+try:
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))   # this script LIVES IN "2. N_application_rate"
+except NameError:
+    pass   # cell-by-cell in Spyder: set the working dir to "2. N_application_rate" first
 
 # ===================== settings =====================
 HOSTS    = ["ftp2.tpdc.ac.cn", "ftp3.tpdc.ac.cn"]
@@ -22,7 +25,7 @@ PORT     = 6201
 USERNAME = "download_XXXXXXXX"
 PASSWORD = "XXXXXXXX"
 REMOTE_DIR = "/"
-LOCAL_DIR  = "2. N_application_rate"
+LOCAL_DIR  = "."   # the script sits INSIDE "2. N_application_rate" -> download right here
 PASSIVE   = True
 TIMEOUT   = 120
 RETRIES   = 10                 # download attempts per file

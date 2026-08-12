@@ -14,9 +14,12 @@ import numpy as np
 import pandas as pd
 import rasterio
 
-os.chdir(os.path.dirname(os.path.abspath(__file__)))  # this script folder (A_agricultural_leaching)
-TIF  = "3. CFs/CF_arable_final.tif"
-OUT  = "3. CFs/CF_arable.csv"
+try:
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))   # this script LIVES IN "3. CFs"
+except NameError:
+    pass   # cell-by-cell in Spyder: set the working dir to "3. CFs" first
+TIF  = "CF_arable_final.tif"    # in THIS folder (3. CFs)
+OUT  = "CF_arable.csv"          # written next to the tif
 NCOL = 4320   # 5 arcmin grid: 4320 lon x 2160 lat
 
 # ---- STEP 1: read the raster ----------------------------------------------------

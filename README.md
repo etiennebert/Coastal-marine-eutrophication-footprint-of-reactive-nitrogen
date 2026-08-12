@@ -26,12 +26,13 @@ Supporting_Information/
 ├── 0_shape_files/                     GIS boundaries (data-only, not tracked)
 │   ├── 1_World_Countries/             country + EEZ polygons
 │   ├── 2_LME shape files/             LME sub-segments (cLME_ss_full)
-│   └── 3_BasinID_shape_PCR2/          PCR-GLOBWB river-basin IDs
+│   ├── 3_BasinID_shape_PCR2/          PCR-GLOBWB river-basin IDs
+│   ├── 6_EEZ_land_union_v3_202003/    EEZ–land union (SHARED by both air scripts)
+│   └── 0_gridcells_LME_mapped.csv     air-grid cell → LME map (SHARED, tracked)
 │
 ├── A_agricultural_leaching/           Waterborne-N cropland & grazing pathway
-│   ├── a_download_adalibieke.py       fetch crop N-application data (TPDC FTP)
-│   ├── b_make_CF_csv_from_tif.py      CF_arable_final.tif  -> CF_arable.csv
-│   ├── c_adalibieke_to_long_csv.py    per-crop N-application -> long table
+│   ├── 2. N_application_rate/a_download_adalibieke.py   fetch the Adalibieke data (TPDC FTP)
+│   ├── 3. CFs/b_make_CF_csv_from_tif.py                 CF_arable_final.tif -> CF_arable.csv
 │   ├── 1_crop_eutrophication_pipeline.py     crop-disaggregated leaching -> LME
 │   ├── 2_grazing_eutrophication_pipeline.py  grazing/pasture leaching -> LME
 │   ├── 1. Input_IMAGE_GNM/            IMAGE-GNM cropland N budget (.nc, data)
@@ -41,18 +42,22 @@ Supporting_Information/
 │   ├── 5. outputs_crops/              generated (not tracked)
 │   └── 6. outputs_grazing/            generated (not tracked)
 │
+├── 0_prepare_EDGAR_emissions.py       ONE prep script: raw EDGAR v8.1 txt -> both emission
+│                                      databases (Parquet; verified against the legacy CSVs)
+│
 ├── B_airborne_NH3/                    NH₃ emissions × atmospheric CF -> LME
 │   ├── apply_NH3_CF_country_LME.py    main script (country × sector × LME)
-│   ├── CF_NHx_all.csv                 source→receptor CF matrix (data)
-│   ├── NH3_EDGAR_2015_2022.csv        EDGAR NH₃ emissions (data)
-│   └── 0_gridcells_LME_mapped.csv     grid-cell → LME mapping (data)
+│   ├── 1. EDGARv8.1_NH3emissions/     raw EDGAR sector txt + extraction script (data)
+│   ├── 2. CFs/CF_NHx_all.csv          source→receptor CF matrix (data)
+│   ├── 3. Output/                     all NH₃ results (generated)
+│   └── NH3_EDGAR_2015_2022.parquet    prepared emission database (generated)
 │
 ├── C_airborne_NOx/                    NOₓ emissions × atmospheric CF -> LME
-│   ├── apply_NOx_CF.py                CF application (base)
 │   ├── apply_NOx_CF_country_LME.py    main script (country × sector × LME)
-│   ├── CF_NOx.m                       MATLAB builder for the NOx CF matrix
-│   ├── CF_NOx_all.csv                 source→receptor CF matrix (data)
-│   └── NOx_EDGAR*.csv                 EDGAR NOₓ emissions (data)
+│   ├── 1. EDGAR_V8.1_NOx/             raw EDGAR sector txt + extraction script (data)
+│   ├── 2. CFs/                        CF_NOx.m (MATLAB builder) + CF_NOx_all.csv (data)
+│   ├── 3. Output/                     all NOₓ results (generated)
+│   └── NOx_EDGAR_2015_2022.parquet    prepared emission database (generated)
 │
 ├── D_Eutrophication_and_sensitivity_check/   sensitivity checks (placeholder)
 │
@@ -96,26 +101,29 @@ to `os.getcwd()` when `__file__` is undefined.
 
 ### A — Agricultural leaching (Python)
 
-1. **`a_download_adalibieke.py`** — downloads the Adalibieke crop-specific
+1. **`a_download_adalibieke.py`** (in `2. N_application_rate/`) — downloads the Adalibieke crop-specific
    N-application and harvested-area files into `2. N_application_rate/`. The TPDC
    FTP server is flaky; the script resumes partial files, so just re-run it until
    every file is complete. *(See the security note below before publishing this
    file.)*
-2. **`b_make_CF_csv_from_tif.py`** — converts the 5-arcmin CF raster
+2. **`b_make_CF_csv_from_tif.py`** (in `3. CFs/`) — converts the 5-arcmin CF raster
    (`CF_arable_final.tif`, Vea et al. 2022) into `CF_arable.csv`.
-3. **`c_adalibieke_to_long_csv.py`** — (optional helper) stacks the per-crop
-   N-application into a single long table.
-4. **`1_crop_eutrophication_pipeline.py`** — splits the IMAGE-GNM cropland N
+3. **`1_crop_eutrophication_pipeline.py`** — splits the IMAGE-GNM cropland N
    surplus into (cell × crop) using the leaching-potential weights, multiplies by
    the CF, and writes `5. outputs_crops/crop_eutrophication_cells_<year>.csv`
    for 2015–2022.
-5. **`2_grazing_eutrophication_pipeline.py`** — the grazing/pasture twin, writing
+4. **`2_grazing_eutrophication_pipeline.py`** — the grazing/pasture twin, writing
    to `6. outputs_grazing/`.
 
 ### B / C — Airborne NH₃ and NOₓ (Python; MATLAB for the NOx CF)
 
+0. **`0_prepare_EDGAR_emissions.py`** (repo root) — builds both emission databases
+   from the raw EDGAR v8.1 sector files (`1. EDGAR…` folders) with the exact legacy
+   sector labels, writes compact Parquet, and self-verifies against the legacy CSVs.
+
 `apply_NH3_CF_country_LME.py` and `apply_NOx_CF_country_LME.py` multiply gridded
-EDGAR emissions by a precomputed source→receptor characterization-factor matrix
+EDGAR emissions (Parquet preferred, CSV fallback) by a precomputed source→receptor
+characterization-factor matrix
 (`CF_*_all.csv`), map receptors to LME sub-segments, and aggregate the marine
 eutrophication impact by emitting **country × IPCC sector × LME**. They also emit
 per-cell impact maps and per-LME / per-cell CF layers. `CF_NOx.m` documents how
