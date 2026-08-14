@@ -1,0 +1,56 @@
+Nleach 2015 : placed 1.805418e+10 kg O2 in 3993 nonzero cells
+Nleach 2016 : placed 1.813240e+10 kg O2 in 4045 nonzero cells
+Nleach 2017 : placed 1.821062e+10 kg O2 in 4045 nonzero cells
+Nleach 2018 : placed 1.828884e+10 kg O2 in 4045 nonzero cells
+Nleach 2019 : placed 1.836705e+10 kg O2 in 4045 nonzero cells
+Nleach 2020 : placed 1.844527e+10 kg O2 in 4020 nonzero cells
+Nleach 2021 : placed 1.846074e+10 kg O2 in 4046 nonzero cells
+Nleach 2022 : placed 1.847621e+10 kg O2 in 4046 nonzero cells
+Nleach 2015 : placed 1.805418e+10 kg O2 in 3993 nonzero cells
+Nleach 2016 : placed 1.813240e+10 kg O2 in 4045 nonzero cells
+Nleach 2017 : placed 1.821062e+10 kg O2 in 4045 nonzero cells
+Nleach 2018 : placed 1.828884e+10 kg O2 in 4045 nonzero cells
+Nleach 2019 : placed 1.836705e+10 kg O2 in 4045 nonzero cells
+Nleach 2020 : placed 1.844527e+10 kg O2 in 4020 nonzero cells
+Nleach 2021 : placed 1.846074e+10 kg O2 in 4046 nonzero cells
+Nleach 2022 : placed 1.847621e+10 kg O2 in 4046 nonzero cells
+NH3 2015 : placed 1.892503e+10 kg O2 in 5844410 nonzero cells
+NH3 2016 : placed 1.876494e+10 kg O2 in 5844410 nonzero cells
+NH3 2017 : placed 1.860871e+10 kg O2 in 5846850 nonzero cells
+NH3 2018 : placed 1.847025e+10 kg O2 in 5846545 nonzero cells
+NH3 2019 : placed 1.850429e+10 kg O2 in 5848070 nonzero cells
+NH3 2020 : placed 1.836191e+10 kg O2 in 5848070 nonzero cells
+NH3 2021 : placed 1.835560e+10 kg O2 in 5848070 nonzero cells
+NH3 2022 : placed 1.831714e+10 kg O2 in 5848070 nonzero cells
+NOx 2015 : placed 4.617753e+10 kg O2 in 5853255 nonzero cells
+NOx 2016 : placed 4.496231e+10 kg O2 in 5854780 nonzero cells
+NOx 2017 : placed 4.495119e+10 kg O2 in 5856610 nonzero cells
+NOx 2018 : placed 4.499836e+10 kg O2 in 5855695 nonzero cells
+NOx 2019 : placed 4.418853e+10 kg O2 in 5855695 nonzero cells
+NOx 2020 : placed 4.103358e+10 kg O2 in 5855390 nonzero cells
+NOx 2021 : placed 4.297737e+10 kg O2 in 5855390 nonzero cells
+NOx 2022 : placed 4.382721e+10 kg O2 in 5856915 nonzero cells
+Nleach 2015 : source 1.805616e+10 = placed 1.805418e+10 + ABNJ 0.000000e+00 | gap 1.98e+06  << UNMATCHED (see satellite_unmatched.csv)
+Nleach 2016 : source 1.813437e+10 = placed 1.813240e+10 + ABNJ 0.000000e+00 | gap 1.97e+06  << UNMATCHED (see satellite_unmatched.csv)
+Nleach 2017 : source 1.821258e+10 = placed 1.821062e+10 + ABNJ 0.000000e+00 | gap 1.96e+06  << UNMATCHED (see satellite_unmatched.csv)
+Nleach 2018 : source 1.829079e+10 = placed 1.828884e+10 + ABNJ 0.000000e+00 | gap 1.95e+06  << UNMATCHED (see satellite_unmatched.csv)
+Nleach 2019 : source 1.836899e+10 = placed 1.836705e+10 + ABNJ 0.000000e+00 | gap 1.94e+06  << UNMATCHED (see satellite_unmatched.csv)
+Nleach 2020 : source 1.844720e+10 = placed 1.844527e+10 + ABNJ 0.000000e+00 | gap 1.93e+06  << UNMATCHED (see satellite_unmatched.csv)
+Nleach 2021 : source 1.846266e+10 = placed 1.846074e+10 + ABNJ 0.000000e+00 | gap 1.92e+06  << UNMATCHED (see satellite_unmatched.csv)
+Nleach 2022 : source 1.847812e+10 = placed 1.847621e+10 + ABNJ 0.000000e+00 | gap 1.92e+06  << UNMATCHED (see satellite_unmatched.csv)
+NH3    2015 : source 1.892538e+10 = placed 1.892503e+10 + ABNJ 3.517847e+05 | gap 3.96e+01  OK
+NH3    2016 : source 1.876530e+10 = placed 1.876494e+10 + ABNJ 3.688575e+05 | gap 4.30e+01  OK
+NH3    2017 : source 1.860910e+10 = placed 1.860871e+10 + ABNJ 3.909724e+05 | gap 4.69e+01  OK
+NH3    2018 : source 1.847065e+10 = placed 1.847025e+10 + ABNJ 4.048607e+05 | gap 5.19e+01  OK
+NH3    2019 : source 1.850470e+10 = placed 1.850429e+10 + ABNJ 4.100748e+05 | gap 5.09e+01  OK
+NH3    2020 : source 1.836213e+10 = placed 1.836191e+10 + ABNJ 2.196772e+05 | gap 4.66e+01  OK
+NH3    2021 : source 1.835585e+10 = placed 1.835560e+10 + ABNJ 2.499805e+05 | gap 4.93e+01  OK
+NH3    2022 : source 1.831744e+10 = placed 1.831714e+10 + ABNJ 2.979917e+05 | gap 5.21e+01  OK
+NOx    2015 : source 4.703890e+10 = placed 4.617753e+10 + ABNJ 3.595296e+08 | gap 5.02e+08  << UNMATCHED (see satellite_unmatched.csv)
+NOx    2016 : source 4.583416e+10 = placed 4.496231e+10 + ABNJ 3.684325e+08 | gap 5.03e+08  << UNMATCHED (see satellite_unmatched.csv)
+NOx    2017 : source 4.585865e+10 = placed 4.495119e+10 + ABNJ 3.931421e+08 | gap 5.14e+08  << UNMATCHED (see satellite_unmatched.csv)
+NOx    2018 : source 4.591535e+10 = placed 4.499836e+10 + ABNJ 4.036795e+08 | gap 5.13e+08  << UNMATCHED (see satellite_unmatched.csv)
+NOx    2019 : source 4.509880e+10 = placed 4.418853e+10 + ABNJ 3.972940e+08 | gap 5.13e+08  << UNMATCHED (see satellite_unmatched.csv)
+NOx    2020 : source 4.188403e+10 = placed 4.103358e+10 + ABNJ 3.349763e+08 | gap 5.15e+08  << UNMATCHED (see satellite_unmatched.csv)
+NOx    2021 : source 4.385749e+10 = placed 4.297737e+10 + ABNJ 3.601026e+08 | gap 5.20e+08  << UNMATCHED (see satellite_unmatched.csv)
+NOx    2022 : source 4.473485e+10 = placed 4.382721e+10 + ABNJ 3.874747e+08 | gap 5.20e+08  << UNMATCHED (see satellite_unmatched.csv)

@@ -28,6 +28,7 @@
 *.yxdb
 *.npy
 *.npz
+*.mat
 *.parquet
 *.feather
 *.pkl
