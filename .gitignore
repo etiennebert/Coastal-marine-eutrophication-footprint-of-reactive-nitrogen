@@ -61,6 +61,9 @@
 A_agricultural_leaching/5. outputs_crops/
 A_agricultural_leaching/6. outputs_grazing/
 
+# ------------- Kept local only (not part of the published repo/archive) -------------
+F_Practical_case/
+
 # ------------- Archived / scratch / superseded -------------
 **/0. Old/
 **/0_Old/
@@ -86,8 +89,9 @@ desktop.ini
 *.tmp
 
 # ------------- Local secrets — NEVER commit -------------
-#  a_download_adalibieke.py currently hard-codes FTP credentials; move them
-#  into one of these local files (see README "Security note") before pushing.
+#  a_download_adalibieke.py ships with placeholders and reads TPDC_USER /
+#  TPDC_PASS from the environment; if you store your personal credentials in
+#  a local file instead, name it so one of these patterns catches it.
 .env
 *secret*
 *credentials*
