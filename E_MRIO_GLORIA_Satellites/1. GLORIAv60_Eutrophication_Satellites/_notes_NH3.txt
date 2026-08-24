@@ -1,0 +1,9 @@
+NH3 2015 : placed 1.892503e+10 kg O2 in 5844410 nonzero cells
+NH3 2016 : placed 1.876494e+10 kg O2 in 5844410 nonzero cells
+NH3 2017 : placed 1.860871e+10 kg O2 in 5846850 nonzero cells
+NH3 2018 : placed 1.847025e+10 kg O2 in 5846545 nonzero cells
+NH3 2019 : placed 1.850429e+10 kg O2 in 5848070 nonzero cells
+NH3 2020 : placed 1.836191e+10 kg O2 in 5848070 nonzero cells
+NH3 2021 : placed 1.835560e+10 kg O2 in 5848070 nonzero cells
+NH3 2022 : placed 1.831714e+10 kg O2 in 5848070 nonzero cells
+NOTE: 3802 (label x region x year) splits used the GLOBAL fallback key

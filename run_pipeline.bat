@@ -55,7 +55,7 @@ if "%RUN_HARMONISE%"=="1" (
   if errorlevel 1 goto :fail
 )
 if "%RUN_SATELLITES%"=="1" (
-  call :step "%ROOT%E_MRIO_GLORIA_Sattelites" 0_build_MRIO_satellites.py
+  call :step "%ROOT%E_MRIO_GLORIA_Satellites" 0_build_MRIO_satellites.py
   if errorlevel 1 goto :fail
 )
 

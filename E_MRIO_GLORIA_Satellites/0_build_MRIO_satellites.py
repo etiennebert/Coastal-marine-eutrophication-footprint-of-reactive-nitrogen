@@ -48,7 +48,7 @@
 #     - Antarctica: country_to_GLORIA_region.csv maps it to 'Antarctica', which is
 #       not a GLORIA region (Antarctic-EEZ shipping, ~0.001% of NOx).
 #
-# OUTPUT  (in "4. Satellites\")
+# OUTPUT  (in "1. GLORIAv60_Eutrophication_Satellites\")
 #   satellite_<flow>_<year>.mat     MATLAB: sparse 'S' (305 x 39360) + row labels
 #   satellite_<flow>_<year>.npz     the same matrix for Python (scipy.sparse)
 #   satellite_row_labels.csv        the 305 LME sub-segments, in row order
@@ -104,7 +104,7 @@ except NameError:                                           # cell-by-cell in Sp
     HERE = os.getcwd()
 ROOT   = os.path.dirname(HERE)                              # ...\Supporting_Information
 G60    = os.path.join(HERE, "0. data_GLORIAv60")
-OUTDIR = os.path.join(HERE, "4. Satellites")
+OUTDIR = os.path.join(HERE, "1. GLORIAv60_Eutrophication_Satellites")
 os.makedirs(OUTDIR, exist_ok=True)
 
 HARMONISED = os.path.join(ROOT, "D_Final_Database", "eutrophication_all_pathways.parquet")
@@ -135,7 +135,14 @@ SLUG_ALIAS = {"NOx": {"1A1b_1A1ci_1A1cii_1B1_1B2": "1A1b_1A1c_1B1_1B2"}, "NH3": 
 #   (substance, label) -> (substance, label) to borrow the year-specific vector from.
 #   NOx 3C1b = agricultural waste burning; NH3 3C1 is the SAME activity, so its
 #   region x sector footprint is the appropriate stand-in (see header).
-EMPTY_LABEL_PROXY = {("NOx", "3C1b"): ("NH3", "3C1")}
+#   NOx 2A   = mineral industry (NMM: cement, lime, ...): GLORIA60's NOx 2A vector
+#   (file stem 'NOx_G5') is zero in every year 2015-2022 as well; NH3 2A - the
+#   SAME NMM activity (file stem 'NH3_G4') - IS populated and carries the same
+#   non-metallic-minerals sector footprint, so it serves as the split key.
+#   (Scan of all GLORIA60 vectors, both substances, all years: these are the
+#   ONLY two all-zero labels.)
+EMPTY_LABEL_PROXY = {("NOx", "3C1b"): ("NH3", "3C1"),
+                     ("NOx", "2A"):   ("NH3", "2A")}
 
 # agriculture (World_Countries) spelling -> country_to_GLORIA_region.csv spelling
 AG_NAME_ALIAS = {
@@ -258,7 +265,7 @@ if RUN_PREP or not _have_cache:
                   "GLORIA_sector": list(crop_map.values()) + list(gsplit),
                   "share": [1.0] * len(crop_map) + list(gsplit.values())}
                  ).to_csv(os.path.join(OUTDIR, "_activity_to_sector.csv"), index=False)
-    print("   prep done -> caches + label files in '4. Satellites'")
+    print("   prep done -> caches + label files in '1. GLORIAv60_Eutrophication_Satellites'")
 
 # ---- reload the lookups from the cache (single code path for all later blocks) ----
 _z        = np.load(os.path.join(OUTDIR, "_labels.npz"), allow_pickle=True)
@@ -373,11 +380,19 @@ for SUB in (["NH3"] if RUN_NH3 else []) + (["NOx"] if RUN_NOX else []):
             _slug = os.path.basename(_f).split("#", 1)[1][:-4]
             vecs[slug_to_ours.get(_slug, _slug)] = np.loadtxt(_f)
 
-        # -- REVIEW: a label with an all-zero own vector borrows the proxy's vector
+        # -- REVIEW: a label with an all-zero own vector borrows the proxy's vector.
+        #    The proxy file is located with a WILDCARD stem: the MATLAB extraction
+        #    named some files 'GLORIA_<yr>_60_NH3_G4#2A.csv' (group suffix), so an
+        #    exact 'NH3#2A' path would miss them.
         for (_ps, _pl), (_qs, _ql) in EMPTY_LABEL_PROXY.items():
             if _ps == SUB and (_pl not in vecs or vecs[_pl].sum() <= 0):
-                vecs[_pl] = np.loadtxt(os.path.join(
-                    G60, _qs, "GLORIA_%d_60_%s#%s.csv" % (Y, _qs, _ql)))
+                _pf = sorted(glob.glob(os.path.join(
+                    G60, _qs, "GLORIA_%d_60_%s*#%s.csv" % (Y, _qs, _ql))))
+                if not _pf:
+                    print("   %d : %s '%s' empty AND proxy %s '%s' file missing -> stays unmatched"
+                          % (Y, SUB, _pl, _qs, _ql))
+                    continue
+                vecs[_pl] = np.loadtxt(_pf[0])
                 n_proxy += 1
                 print("   %d : %s '%s' empty in GLORIA60 -> split key borrowed from %s '%s' (REVIEW)"
                       % (Y, SUB, _pl, _qs, _ql))

@@ -1,0 +1,105 @@
+{
+  "title": "Coastal marine eutrophication footprint of reactive nitrogen: global emission-to-impact model chain and GLORIA MRIO satellites (2015-2022)",
+  "upload_type": "dataset",
+  "access_right": "open",
+  "license": "cc-by-4.0",
+  "language": "eng",
+  "version": "1.0.0",
+  "creators": [
+    {
+      "name": "Berthet, Etienne",
+      "affiliation": "MIT Center for Sustainability Science and Strategy, Massachusetts Institute of Technology"
+    },
+    {
+      "name": "Vea, Eldbjørg B.",
+      "affiliation": "Technical University of Denmark (DTU)"
+    },
+    {
+      "name": "Panier, Nicolas",
+      "affiliation": "Technical University of Denmark (DTU)"
+    },
+    {
+      "name": "Morris, Jennifer",
+      "affiliation": "MIT Center for Sustainability Science and Strategy, Massachusetts Institute of Technology"
+    },
+    {
+      "name": "Laurent, Alexis",
+      "affiliation": "Technical University of Denmark (DTU)"
+    }
+  ],
+  "description": "<p>Global model chain and dataset quantifying the coastal marine eutrophication footprint of reactive nitrogen (2015&ndash;2022) &mdash; from nitrogen emissions, through spatially explicit fate and effect modelling, to the final consumption ultimately driving the impacts. Three pathways are covered: <b>agricultural leaching</b> of waterborne N, <b>airborne NH<sub>3</sub></b> and <b>airborne NO<sub>x</sub></b>. Impacts are expressed in kg O<sub>2</sub>-eq (marine oxygen depletion) and resolved to 305 coastal Large Marine Ecosystem sub-segments (cLME-ss), with the emitting country and driving activity (crops, grazing, IPCC sectors) attached; they are then harmonised into one comparable database, converted into GLORIA v60 MRIO satellite matrices (305 LME rows &times; 39,360 region-sector columns per year and substance), and traced to final demand with a Leontief demand-pull model &mdash; including product-level detail for seven coral-reef LME sub-segments.</p><p><b>Underlying models and data.</b> The framework builds on and couples: the spatially differentiated marine-eutrophication assessment models of Cosme &amp; Hauschild (2017), Cosme, Mayorga &amp; Hauschild (2018) and Vea et al. (2022, 2024), with atmospheric characterisation following Bj&oslash;rn et al. (2020); the IMAGE-GNM global nutrient model (Beusen et al., 2015; Beusen &amp; Bouwman, 2022) for soil nitrogen budgets; EDGAR v8.1 gridded NH<sub>3</sub>/NO<sub>x</sub> emissions (Crippa et al., 2024); the crop-specific nitrogen fertilisation dataset of Adalibieke et al. (2023); and the GLORIA global environmentally-extended MRIO database, release 060 (University of Sydney IELab; cf. Lenzen et al., 2013; Malik et al., 2022). Full citations are in the record's reference list and in the archived README.</p><p><b>Contents.</b> Shared GIS layers and grid&ndash;LME correspondences; the crop and grazing leaching pipelines; the NH<sub>3</sub>/NO<sub>x</sub> emission preparation and impact pipelines (including the CF-matrix builders CF_NHx.m / CF_NOx.m); the harmonised all-pathway database (Parquet); the GLORIA v60 satellite builder with label, exclusion and conservation reports; and the MATLAB MRIO scripts for production- and consumption-based accounts. Every pipeline is a single linear, cell-structured script with built-in conservation checks; PIPELINE.md documents the execution order and run_pipeline.bat runs the whole chain. Modelling choices a reviewer should see are flagged REVIEW in scripts and reports. Units: kg O<sub>2</sub>-eq; emissions in kg (NO<sub>x</sub> as NO<sub>2</sub>); releases also normalised to kg N.</p><p><b>Not redistributed</b> (in-archive pointer files explain exactly how to obtain each): the TPDC crop-specific fertilisation HDF5 files (personal download credentials; doi:10.11888/Terre.tpdc.300446), the IMAGE-GNM budget netCDFs (INMS data portal, registered users), and the GLORIA core matrices (IELab registration). Third-party data remain under their original licenses and citation requirements.</p>",
+  "keywords": [
+    "marine eutrophication",
+    "reactive nitrogen",
+    "nitrogen footprint",
+    "coastal eutrophication",
+    "Large Marine Ecosystems",
+    "life cycle impact assessment",
+    "characterisation factors",
+    "multi-regional input-output analysis",
+    "GLORIA MRIO",
+    "EDGAR",
+    "IMAGE-GNM",
+    "consumption-based accounting",
+    "ammonia",
+    "nitrogen oxides",
+    "nitrogen leaching",
+    "coral reefs"
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isDerivedFrom",
+      "identifier": "10.11888/Terre.tpdc.300446",
+      "resource_type": "dataset"
+    },
+    {
+      "relation": "cites",
+      "identifier": "10.1007/s11367-017-1271-5",
+      "resource_type": "publication-article"
+    },
+    {
+      "relation": "cites",
+      "identifier": "10.1007/s11367-017-1349-0",
+      "resource_type": "publication-article"
+    },
+    {
+      "relation": "cites",
+      "identifier": "10.1016/j.scitotenv.2022.156873",
+      "resource_type": "publication-article"
+    },
+    {
+      "relation": "cites",
+      "identifier": "10.1007/s11367-024-02311-z",
+      "resource_type": "publication-article"
+    },
+    {
+      "relation": "cites",
+      "identifier": "10.5194/gmd-8-4045-2015",
+      "resource_type": "publication-article"
+    },
+    {
+      "relation": "cites",
+      "identifier": "10.5194/essd-16-2811-2024",
+      "resource_type": "publication-article"
+    },
+    {
+      "relation": "cites",
+      "identifier": "10.1038/s41597-023-02526-z",
+      "resource_type": "publication-article"
+    }
+  ],
+  "references": [
+    "Cosme, N., & Hauschild, M. Z. (2017). Characterization of waterborne nitrogen emissions for marine eutrophication modelling in life cycle impact assessment at the damage level and global scale. The International Journal of Life Cycle Assessment, 22(10), 1558-1570. https://doi.org/10.1007/s11367-017-1271-5",
+    "Cosme, N., Mayorga, E., & Hauschild, M. Z. (2018). Spatially explicit fate factors of waterborne nitrogen emissions at the global scale. The International Journal of Life Cycle Assessment, 23(6), 1286-1296. https://doi.org/10.1007/s11367-017-1349-0",
+    "Vea, E. B., Bendtsen, J., Richardson, K., Ryberg, M., & Hauschild, M. (2022). Spatially differentiated marine eutrophication method for absolute environmental sustainability assessments. Science of The Total Environment, 843, 156873. https://doi.org/10.1016/j.scitotenv.2022.156873",
+    "Vea, E. B., Jwaideh, M., Richardson, K., Ryberg, M., Bjorn, A., & Hauschild, M. (2024). Enabling comprehensive assessment of marine eutrophication impacts and their evaluation against regional safe operating space. The International Journal of Life Cycle Assessment, 29(9), 1738-1755. https://doi.org/10.1007/s11367-024-02311-z",
+    "Bjorn, A., Sim, S., King, H., Margni, M., Henderson, A. D., Payen, S., & Bulle, C. (2020). A comprehensive planetary boundary-based method for the nitrogen cycle in life cycle assessment. Science of The Total Environment, 715, 136813. https://doi.org/10.1016/j.scitotenv.2020.136813",
+    "Beusen, A. H. W., Van Beek, L. P. H., Bouwman, A. F., Mogollon, J. M., & Middelburg, J. J. (2015). Coupling global models for hydrology and nutrient loading to simulate nitrogen and phosphorus retention in surface water - description of IMAGE-GNM and analysis of performance. Geoscientific Model Development, 8(12), 4045-4067. https://doi.org/10.5194/gmd-8-4045-2015",
+    "Beusen, A. H. W., & Bouwman, A. F. (2022). Future projections of river nutrient export to the global coastal ocean show persisting nitrogen and phosphorus distortion. Frontiers in Water, 4. https://doi.org/10.3389/frwa.2022.893585",
+    "Crippa, M., Guizzardi, D., Pagani, F., et al. (2024). Insights into the spatial distribution of global, national, and subnational greenhouse gas emissions in the Emissions Database for Global Atmospheric Research (EDGAR v8.0). Earth System Science Data, 16(6), 2811-2830. https://doi.org/10.5194/essd-16-2811-2024",
+    "Adalibieke, W., Cui, X., Cai, H., You, L., & Zhou, F. (2023). Global crop-specific nitrogen fertilization dataset in 1961-2020. Scientific Data, 10, 617. https://doi.org/10.1038/s41597-023-02526-z",
+    "Malik, A., Oita, A., Shaw, E., Li, M., Ninpanit, P., Nandel, V., Lan, J., & Lenzen, M. (2022). Drivers of global nitrogen emissions. Environmental Research Letters, 17(1), 015006. https://doi.org/10.1088/1748-9326/ac413c",
+    "Lenzen, M., Moran, D., Kanemoto, K., & Geschke, A. (2013). Building Eora: A global multi-region input-output database at high country and sector resolution. Economic Systems Research, 25(1), 20-49. https://doi.org/10.1080/09535314.2013.769938"
+  ],
+  "notes": "This record is a standalone methods-and-data deposit; a related journal article can be linked later via the record's 'Related works' (metadata stays editable after publication). Personal TPDC FTP credentials are required to re-download the Adalibieke fertilisation dataset (a_download_adalibieke.py ships with placeholders, never real credentials)."
+}
