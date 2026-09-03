@@ -22,8 +22,13 @@ except NameError:
 # ===================== settings =====================
 HOSTS    = ["ftp2.tpdc.ac.cn", "ftp3.tpdc.ac.cn"]
 PORT     = 6201
-USERNAME = "download_XXXXXXXX"
-PASSWORD = "XXXXXXXX"
+# TPDC issues PERSONAL FTP credentials per data request - they are NOT shipped
+# with this repository. Request the Adalibieke et al. crop-specific N
+# fertilization dataset on https://data.tpdc.ac.cn (English portal available);
+# the credentials arrive by e-mail within minutes. Then either paste them below
+# or set the environment variables TPDC_USER / TPDC_PASS before running.
+USERNAME = os.environ.get("TPDC_USER", "download_XXXXXXXX")
+PASSWORD = os.environ.get("TPDC_PASS", "XXXXXXXX")
 REMOTE_DIR = "/"
 LOCAL_DIR  = "."   # the script sits INSIDE "2. N_application_rate" -> download right here
 PASSIVE   = True
@@ -150,6 +155,9 @@ def download_one(box, remote_path, local_path):
 
 
 # ----------------------------------------------------------------- run
+if "XXXXXXXX" in USERNAME or "XXXXXXXX" in PASSWORD:
+    raise SystemExit("No TPDC credentials set. Request the dataset on https://data.tpdc.ac.cn"
+                     " and put YOUR credentials in USERNAME/PASSWORD above (or TPDC_USER/TPDC_PASS env vars).")
 box = [None]
 if not ensure_connection(box):
     raise SystemExit("Could not reach the FTP server at all. Try again later (02:00-10:00 Beijing).")

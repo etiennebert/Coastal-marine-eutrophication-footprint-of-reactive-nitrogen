@@ -17,6 +17,8 @@
 #   per 0.5 deg box g:  L(cell,crop) = L_box(g) * P / sum(P over the box),
 #                       P = Nsyn*LF_crop + Nman*LF_organic
 #   E(cell,crop) = L(cell,crop) * 1e9 (kgN per MtN) * CF(cell)          -> marine eutrophication
+#   N_reaching(cell,crop) = E / CF_marine(LME_nb_f_1)  -> kg N actually ENTERING the receiving
+#   sub-segment's water (CF_arable = export-to-sea x CF_marine, so the division backs it out).
 #   Atmospheric deposition is REMOVED from the IMAGE surplus so this does not double-count
 #   the separate airborne NH3 / NOx streams.
 #
@@ -26,6 +28,11 @@
 #   DB2  crop_eutrophication_LMEcountry_<year>.csv  DB1 rows expanded to Country_LME, eutrophication
 #                                                   split by each country's EEZ share of the LME
 #                                                   (an ASSUMPTION: impact placed uniformly in LME).
+#
+# OPTIONAL INPUT  "3. CFs/CF_marine_LME.csv"  (columns: LME_nb_f_1, CF_marine) - the MARINE-ONLY
+#   CF, kg O2 per kg N ENTERING each sub-segment (fate x effect of Cosme & Hauschild at the
+#   sub-segment level of Vea et al. - MUST be the same vintage baked into CF_arable_final.tif).
+#   If the file is absent the pipeline runs unchanged and N_reaching_MtN is written as NaN.
 #
 # DOWNLOAD STATUS (important)
 #   Harvested_area_1961-2020.h5 may still be downloading (~2.8 GB complete). If it cannot be
@@ -59,6 +66,7 @@ AREA_FILE   = os.path.join(ADAL_DIR, "Harvested_area_1961-2020.h5")
 BASIN_SHP   = os.path.join(SHAPES, "3_BasinID_shape_PCR2", "BasinID_PCR2.shp")
 MOUTH_CSV   = os.path.join(HERE, "MouthID_PCR2.csv")
 LME_SHP     = os.path.join(SHAPES, "2_LME shape files", "cLME_ss_full.shp")
+CFM_CSV     = os.path.join(HERE, "3. CFs", "CF_marine_LME.csv")   # marine-only CF per sub-segment (optional)
 
 CTRY_SHP    = os.path.join(SHAPES, "1_World_Countries", "World_Countries.shp")
 EEZ_SHP     = os.path.join(SHAPES, "4_World_EEZ_v11", "eez_v11.shp")
@@ -126,6 +134,19 @@ xwalk["BasinID"] = xwalk["BasinID"].astype("Int64")
 pts = pts.merge(xwalk, on="BasinID", how="left")                   # cell -> basin -> LME
 print("A3  BasinID -> LME crosswalk merged")
 
+#   PLUS: marine-only CF of the receiving sub-segment - the divisor that backs the delivered
+#   N out of the impact (tolerant label key: '10', '10.0' and '10_0' all match).
+_k = lambda s: s.astype(str).str.replace(r"\.0$", "", regex=True).str.replace(r"_0$", "", regex=True)
+if os.path.exists(CFM_CSV):
+    cfm = pd.read_csv(CFM_CSV)[["LME_nb_f_1", "CF_marine"]]
+    cfm["_key"] = _k(cfm["LME_nb_f_1"])
+    pts["_key"] = _k(pts["LME_nb_f_1"])
+    pts = pts.merge(cfm[["_key", "CF_marine"]], on="_key", how="left").drop(columns="_key")
+    print("A3  CF_marine merged:", int(pts["CF_marine"].notna().sum()), "of", len(pts), "cells")
+else:
+    pts["CF_marine"] = np.nan
+    print("A3  NOTE: '3. CFs/CF_marine_LME.csv' not found -> N_reaching_MtN will be NaN")
+
 # %% A4) GEO-JOIN 3 of 3 : each cell  ->  the PRODUCER country (where the crop N is applied)
 #   WHY : this is the country credited with PRODUCING the leaching (renamed Country_producer in
 #         PART B). It is the emission/production side - NOT where the impact lands (that is
@@ -147,7 +168,7 @@ if miss.any():
     pts.loc[miss, "Country"] = pts.loc[miss, "fid"].map(nn)        # fill only the misses
 
 cells = pd.DataFrame(pts.drop(columns="geometry"))[
-    ["fid", "longitude", "latitude", "CF", "cid",
+    ["fid", "longitude", "latitude", "CF", "CF_marine", "cid",
      "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m", "Country"]]
 cells.to_csv(os.path.join(OUTDIR, "cell_attributes_static.csv"), index=False)
 print("A4  static cells:", len(cells), "-> saved cell_attributes_static.csv")
@@ -247,8 +268,12 @@ adal["P"]     = adal["Nsyn"] * adal["LF_c"] + adal["Nman"] * organic_lf
 adal = adal[adal["P"] > 0].copy()
 adal["share"] = adal["P"] / adal.groupby("cid")["P"].transform("sum")     # crop share within each 0.5 deg box
 alloc = adal[["fid", "cid", "crop", "lf_class", "share",
-              "longitude", "latitude", "CF", "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m", "Country"]]
+              "longitude", "latitude", "CF", "CF_marine", "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m", "Country"]]
 print("A5d (cell x crop) allocation rows:", len(alloc))
+fex = (alloc["CF"] / alloc["CF_marine"]).dropna()   # export fraction: share of released N reaching the sea; must be <= 1
+if len(fex):
+    print("A5d export fraction CF/CF_marine: median %.3f | max %.3f%s"
+          % (fex.median(), fex.max(), "   << >1: CF_marine WRONG VINTAGE/LEVEL" if fex.max() > 1.001 else ""))
 if SAVE_ADAL_SPLIT:
     _split_cols = ["fid", "longitude", "latitude", "cid", "crop", "lf_class",
                    "Nsyn", "Nman", "LF_c", "P", "share", "CF",
@@ -297,6 +322,7 @@ for Y in YEARS:
     a = alloc.merge(box[["cid", "L_box"]], on="cid", how="left")
     a["crop_leaching_MtN"] = a["L_box"] * a["share"]         # split the box total by crop share
     a["eutrophication"]    = a["crop_leaching_MtN"] * KG_PER_MT * a["CF"]   # result in kg O2 (marine O2 depletion) = kg N x CF[kg O2 per kg N] (Cosme & Hauschild)
+    a["N_reaching_MtN"]    = a["eutrophication"] / a["CF_marine"] / KG_PER_MT   # Mt N ENTERING the sub-segment's water (NaN without CF_marine)
 
     # ---- DATABASE 1 : the honest per-(cell, crop) result -- NO receptor assumption ----------------
     #   One row per producing cell x crop. Country_producer = where the N is applied; LME_nb_f_1 =
@@ -305,12 +331,13 @@ for Y in YEARS:
     out = a.dropna(subset=["crop_leaching_MtN"]).rename(columns={"Country": "Country_producer"})
     out.insert(0, "year", Y)
     db1 = out[["year", "fid", "longitude", "latitude", "crop", "lf_class", "Country_producer",
-               "CF", "cid", "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m",
-               "crop_leaching_MtN", "eutrophication"]]
+               "CF", "CF_marine", "cid", "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m",
+               "crop_leaching_MtN", "N_reaching_MtN", "eutrophication"]]
     db1.to_csv(os.path.join(OUTDIR, "crop_eutrophication_%d.csv" % Y), index=False)
-    print("%d : DB1 cell-rows=%8d | placed=%6.3f of IMAGE %6.3f Tg N (%.0f%%) | eutrophication(kg O2)=%.4e"
+    rtxt = ("%.3f" % db1["N_reaching_MtN"].sum()) if db1["N_reaching_MtN"].notna().any() else "n/a"
+    print("%d : DB1 cell-rows=%8d | placed=%6.3f of IMAGE %6.3f Tg N (%.0f%%) | reaching sea=%s Tg N | eutrophication(kg O2)=%.4e"
           % (Y, len(db1), db1["crop_leaching_MtN"].sum(), box["L_box"].sum(),
-             100 * db1["crop_leaching_MtN"].sum() / box["L_box"].sum(), db1["eutrophication"].sum()))
+             100 * db1["crop_leaching_MtN"].sum() / box["L_box"].sum(), rtxt, db1["eutrophication"].sum()))
 
     # ---- DATABASE 2 : receptor attribution -- ARTIFICIAL split by EEZ coverage of the LME ---------
     #   Assumption: the impact is spread uniformly over the LME, so each cell's eutrophication is

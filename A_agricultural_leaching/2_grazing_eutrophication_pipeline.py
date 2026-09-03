@@ -5,6 +5,8 @@
 # Per cell:
 #   IMAGE pasture NO3 (0.5 deg, Tg N)  --split equally over the n_valid CF cells in the box-->
 #   grazing_leaching (Tg N)  --x 1e9-->  kg N  --x CF (Cosme & Hauschild, per kg N)-->  eutrophication
+#   N_reaching = eutrophication / CF_marine(LME_nb_f_1)  -> kg N ENTERING the receiving sub-segment
+#   (optional input "3. CFs/CF_marine_LME.csv" [LME_nb_f_1, CF_marine]; absent -> N_reaching = NaN)
 #
 # Each cell is tagged with BasinID, LME subsegment (LME_nb_f_1) and Country. Those tags depend
 # only on the (static) CF grid, so they are built ONCE in PART A; only the leaching value
@@ -42,6 +44,7 @@ CF_CSV     = os.path.join(HERE, "3. CFs", "CF_arable.csv")            # same dat
 BASIN_SHP  = os.path.join(SHAPES, "3_BasinID_shape_PCR2", "BasinID_PCR2.shp")
 MOUTH_CSV  = os.path.join(HERE, "MouthID_PCR2.csv")
 LME_SHP    = os.path.join(SHAPES, "2_LME shape files", "cLME_ss_full.shp")
+CFM_CSV    = os.path.join(HERE, "3. CFs", "CF_marine_LME.csv")        # marine-only CF per sub-segment (optional)
 CTRY_SHP   = os.path.join(SHAPES, "1_World_Countries", "World_Countries.shp")
 OUTDIR     = os.path.join(HERE, "6. outputs_grazing")
 os.makedirs(OUTDIR, exist_ok=True)
@@ -95,6 +98,19 @@ xwalk = (gpd.sjoin_nearest(mouths.to_crs(CRS_M), lme.to_crs(CRS_M), how="left", 
 xwalk["BasinID"] = xwalk["BasinID"].astype("Int64")
 pts = pts.merge(xwalk, on="BasinID", how="left")                   # cell -> basin -> LME
 
+#   PLUS: marine-only CF of the receiving sub-segment (kg O2 per kg N ENTERING the water) -
+#   the divisor that backs the delivered N out of the impact. Tolerant label key.
+_k = lambda s: s.astype(str).str.replace(r"\.0$", "", regex=True).str.replace(r"_0$", "", regex=True)
+if os.path.exists(CFM_CSV):
+    cfm = pd.read_csv(CFM_CSV)[["LME_nb_f_1", "CF_marine"]]
+    cfm["_key"] = _k(cfm["LME_nb_f_1"])
+    pts["_key"] = _k(pts["LME_nb_f_1"])
+    pts = pts.merge(cfm[["_key", "CF_marine"]], on="_key", how="left").drop(columns="_key")
+    print("A3  CF_marine merged:", int(pts["CF_marine"].notna().sum()), "of", len(pts), "cells")
+else:
+    pts["CF_marine"] = np.nan
+    print("A3  NOTE: '3. CFs/CF_marine_LME.csv' not found -> N_reaching_MtN will be NaN")
+
 # A4) GEO-JOIN 3 of 3 : each cell  ->  the PRODUCER country (where the pasture N is applied)
 #   WHY : the country credited with PRODUCING the leaching (renamed Country_producer in PART B) -
 #         the production side, NOT where the impact lands (that is Country_LME, from LME coverage).
@@ -112,10 +128,14 @@ if miss.any():
 
 # static attribute table: one row per CF cell
 cells = pd.DataFrame(pts.drop(columns="geometry"))[
-    ["fid", "longitude", "latitude", "CF", "cid", "n_valid",
+    ["fid", "longitude", "latitude", "CF", "CF_marine", "cid", "n_valid",
      "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m", "Country"]]
 cells.to_csv(os.path.join(OUTDIR, "cell_attributes_static.csv"), index=False)
 print("PART A done -- static cells:", len(cells))
+fex = (cells["CF"] / cells["CF_marine"]).dropna()   # export fraction: share of released N reaching the sea; must be <= 1
+if len(fex):
+    print("PART A export fraction CF/CF_marine: median %.3f | max %.3f%s"
+          % (fex.median(), fex.max(), "   << >1: CF_marine WRONG VINTAGE/LEVEL" if fex.max() > 1.001 else ""))
 
 # ===========================================================================
 # PART B  -  yearly grazing leaching x CF  (loop 2015..2022)
@@ -162,6 +182,7 @@ for Y in YEARS:
     yr_cells = cells.merge(pas[["cid", "L_pasture"]], on="cid", how="left")
     yr_cells["grazing_leaching_MtN"] = yr_cells["L_pasture"] / yr_cells["n_valid"]
     yr_cells["eutrophication"]       = yr_cells["grazing_leaching_MtN"] * KG_PER_MT * yr_cells["CF"]   # result in kg O2 (marine O2 depletion) = kg N x CF[kg O2 per kg N] (Cosme & Hauschild)
+    yr_cells["N_reaching_MtN"]       = yr_cells["eutrophication"] / yr_cells["CF_marine"] / KG_PER_MT   # Mt N ENTERING the sub-segment's water (NaN without CF_marine)
 
     # B3) keep cells that actually received pasture leaching; save
     # ---- DATABASE 1 : the honest per-cell result -- NO receptor assumption ------------------------
@@ -170,12 +191,13 @@ for Y in YEARS:
     #   lands). Use this table for producer-side / footprint results.
     out = yr_cells.dropna(subset=["grazing_leaching_MtN"]).drop(columns="L_pasture").rename(columns={"Country": "Country_producer"})
     out.insert(0, "year", Y)
-    db1 = out[["year", "fid", "longitude", "latitude", "Country_producer", "CF", "cid", "n_valid",
+    db1 = out[["year", "fid", "longitude", "latitude", "Country_producer", "CF", "CF_marine", "cid", "n_valid",
                "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m",
-               "grazing_leaching_MtN", "eutrophication"]]
+               "grazing_leaching_MtN", "N_reaching_MtN", "eutrophication"]]
     db1.to_csv(os.path.join(OUTDIR, "grazing_eutrophication_%d.csv" % Y), index=False)
-    print("%d : DB1 cell-rows=%7d | leaching placed (Tg N)=%6.3f | eutrophication(kg O2)=%.4e"
-          % (Y, len(db1), db1["grazing_leaching_MtN"].sum(), db1["eutrophication"].sum()))
+    rtxt = ("%.3f" % db1["N_reaching_MtN"].sum()) if db1["N_reaching_MtN"].notna().any() else "n/a"
+    print("%d : DB1 cell-rows=%7d | leaching placed (Tg N)=%6.3f | reaching sea=%s Tg N | eutrophication(kg O2)=%.4e"
+          % (Y, len(db1), db1["grazing_leaching_MtN"].sum(), rtxt, db1["eutrophication"].sum()))
 
     # ---- DATABASE 2 : receptor attribution -- ARTIFICIAL split by EEZ coverage of the LME ---------
     #   Assumption: impact spread uniformly over the LME, so each cell's eutrophication is divided

@@ -11,7 +11,7 @@
 #   into  eutrophication_all_pathways.parquet  (in THIS folder, D_Final_Database)
 #
 #     pathway | substance | year | emission_country | activity_type | activity |
-#     LME_nb_f_1 | release_kg | release_kgN | CF_kgO2_per_kg | eutrophication_kgO2
+#     LME_nb_f_1 | release_kg | release_kgN | delivered_kgN | CF_kgO2_per_kg | eutrophication_kgO2
 #
 #   HARMONISED ON PURPOSE:
 #     - activity      = crop name / 'grazing' / IPCC sector  (activity_type says which)
@@ -24,6 +24,11 @@
 #                       uses World_Countries. An alias map reconciles the known
 #                       differences; anything still unmatched is REPORTED, not dropped.
 #   CF_kgO2_per_kg = eutrophication / release  (an EFFECTIVE, result-side ratio).
+#     - delivered_kgN = the N actually ENTERING the receiving sub-segment's water, for EVERY
+#       pathway alike:  eutrophication_kgO2 / CF_marine(LME_nb_f_1), with CF_marine (kg O2 per
+#       kg N entering; same Vea/Cosme vintage as the applied CFs) read from
+#       A_agricultural_leaching/"3. CFs"/CF_marine_LME.csv.  File absent -> column is NaN.
+#       release_kgN - delivered_kgN = the land/air transport loss the one-step CF absorbs.
 #
 # HOW TO RUN: whole file, or cell-by-cell ('# %%'). Runtime is dominated by
 # streaming the large crop CSVs (a few minutes). Needs pandas (+ pyarrow for parquet).
@@ -122,11 +127,24 @@ for pathway, dir_, nfac in [("NH3", B_DIR, N_IN_NH3), ("NOx", C_DIR, N_IN_NO2)]:
     d["IPCC_sector"] = d["IPCC_sector"].replace("1A31a", "1A3a")            # legacy typo
     d["LME_nb_f_1"]  = d["LME_nb_f_1"].astype(str).str.replace(r"_0$", "", regex=True)
     d["emission_country"] = fix_country(d["emission_country"])
-    if "emission_kg" not in d.columns:
-        print("  NOTE: %s table has no emission_kg column (pre-update run) -> release = NaN until re-run" % pathway)
-        d["emission_kg"] = np.nan
+    # impact is per source x receptor pair -> summing over pairs is correct
     g = (d.groupby(["year", "emission_country", "IPCC_sector", "LME_nb_f_1"], as_index=False)
-           [["impact_kgO2", "emission_kg"]].sum(min_count=1))
+           [["impact_kgO2"]].sum())
+    # RELEASE must come from the DEDUPLICATED source table (one row per year x
+    # country x sector). The pair table repeats the source emission on every
+    # receptor row (~305 LMEs), so summing it over pairs inflates release ~305x.
+    sf = first_existing([os.path.join(dir_, "3. Output", "1_impact_tables", "%s_impact_by_country_sector.csv" % pathway),
+                         os.path.join(dir_, "%s_impact_by_country_sector.csv" % pathway)],
+                        pathway + " source table")
+    src = pd.read_csv(sf)
+    ecol = [c for c in src.columns if c.startswith("emission_kg")][0]
+    src["IPCC_sector"] = src["IPCC_sector"].replace("1A31a", "1A3a")
+    src["emission_country"] = fix_country(src["emission_country"])
+    src = (src.groupby(["year", "emission_country", "IPCC_sector"], as_index=False)
+              .agg(E_src=(ecol, "sum"), I_src=("impact_kgO2_caused", "sum")))
+    g = g.merge(src, on=["year", "emission_country", "IPCC_sector"], how="left")
+    g["emission_kg"] = g["E_src"] * g["impact_kgO2"] / g["I_src"]   # apportioned by impact share
+    g = g.drop(columns=["E_src", "I_src"])
     g["pathway"]       = pathway
     g["substance"]     = pathway
     g["activity_type"] = "IPCC_sector"
@@ -142,8 +160,27 @@ if not frames:
     raise SystemExit("No pathway data found - run the pipelines first.")
 H = pd.concat(frames, ignore_index=True)
 H["CF_kgO2_per_kg"] = H["eutrophication_kgO2"] / H["release_kg"]
+
+# delivered N: impact / marine-only CF of the receiving sub-segment (uniform for all pathways)
+CFM_CSV = os.path.join(A_DIR, "3. CFs", "CF_marine_LME.csv")
+if os.path.exists(CFM_CSV):
+    cfm = pd.read_csv(CFM_CSV)[["LME_nb_f_1", "CF_marine"]]
+    cfm["_key"] = (cfm["LME_nb_f_1"].astype(str).str.replace(r"\.0$", "", regex=True)
+                                               .str.replace(r"_0$", "", regex=True))
+    H["_key"] = (H["LME_nb_f_1"].astype(str).str.replace(r"\.0$", "", regex=True)
+                                            .str.replace(r"_0$", "", regex=True))
+    H = H.merge(cfm[["_key", "CF_marine"]], on="_key", how="left").drop(columns="_key")
+    H["delivered_kgN"] = H["eutrophication_kgO2"] / H["CF_marine"]
+    n_miss = int(H["CF_marine"].isna().sum())
+    if n_miss:
+        print("delivered_kgN: %d rows with no CF_marine for their LME -> NaN" % n_miss)
+    H = H.drop(columns="CF_marine")
+else:
+    H["delivered_kgN"] = np.nan
+    print("NOTE: %s not found -> delivered_kgN = NaN (add the marine-only CF lookup and re-run)" % CFM_CSV)
+
 H = H[["pathway", "substance", "year", "emission_country", "activity_type", "activity",
-       "LME_nb_f_1", "release_kg", "release_kgN", "CF_kgO2_per_kg", "eutrophication_kgO2"]]
+       "LME_nb_f_1", "release_kg", "release_kgN", "delivered_kgN", "CF_kgO2_per_kg", "eutrophication_kgO2"]]
 
 # country-name reconciliation report: air names that never appear on the agriculture side
 ag  = set(H.loc[H["pathway"].isin(["crop", "grazing"]), "emission_country"].dropna())
@@ -166,6 +203,7 @@ except Exception:
 summary = (H.groupby(["pathway", "year"], as_index=False)
              .agg(rows=("eutrophication_kgO2", "size"),
                   release_kgN=("release_kgN", "sum"),
+                  delivered_kgN=("delivered_kgN", lambda s: s.sum(min_count=1)),
                   eutrophication_kgO2=("eutrophication_kgO2", "sum")))
 summary.to_csv(os.path.join(OUTDIR, "summary_pathway_year.csv"), index=False)
 

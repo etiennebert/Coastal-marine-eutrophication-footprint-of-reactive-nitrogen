@@ -32,20 +32,20 @@ own conservation checks. All impacts in kg O₂-eq.
      (year x pathway x emission_country x activity x LME; release_kg, release_kgN,
       effective CF; prints the pathway x year totals pivot)
 
-[5] E_MRIO_GLORIA_Sattelites/0_build_MRIO_satellites.py   (needs [4])
+[5] E_MRIO_GLORIA_Satellites/0_build_MRIO_satellites.py   (needs [4])
      LINEAR script: five blocks behind RUN_* switches, prep -> water -> NH3 ->
      NOx -> verify  (relaunch any subset: `python 0_build_MRIO_satellites.py NOx verify`)
-     ->  "4. Satellites/": satellite_<flow>_<year>.mat / .npz  (sparse 305 LME rows
+     ->  "1. GLORIAv60_Eutrophication_Satellites/": satellite_<flow>_<year>.mat / .npz  (sparse 305 LME rows
          x 39,360 GLORIA v60 columns, exact sequential order, industry side),
          satellite_row/column_labels.csv, satellite_excluded_<flow>.csv (ABNJ high
          seas + Antarctica - no GLORIA region), satellite_unmatched_<flow>.csv
          (mapping failures - a clean run leaves none), build_report.txt
-     NOx '3C1b' (agric. waste burning) is split with the NH3 '3C1' GLORIA60
-     vector as proxy key - GLORIA's own NOx 3C1b vector is zero in every year (REVIEW).
-     verify must print OK on every flow x year line before going to [6].
+     Two GLORIA60 NOx vectors are zero in every year 2015-2022 and are split
+     with the matching NH3 vectors as proxy keys (REVIEW, EMPTY_LABEL_PROXY):
+     '3C1b' (agric. waste burning -> key NH3 '3C1') and '2A' (mineral
+     industry -> key NH3 '2A'). These are the only two all-zero labels.
+     verify must print OK on every flow x year line.
 
-[6] MRIO (MATLAB)  — load the satellites:
-     d = load('satellite_NH3_2015.mat');   % d.S sparse 305 x 39360, d.LME_rows
 ```
 
 Notes
