@@ -17,8 +17,10 @@
 #   per 0.5 deg box g:  L(cell,crop) = L_box(g) * P / sum(P over the box),
 #                       P = Nsyn*LF_crop + Nman*LF_organic
 #   E(cell,crop) = L(cell,crop) * 1e9 (kgN per MtN) * CF(cell)          -> marine eutrophication
-#   N_reaching(cell,crop) = E / CF_marine(LME_nb_f_1)  -> kg N actually ENTERING the receiving
-#   sub-segment's water (CF_arable = export-to-sea x CF_marine, so the division backs it out).
+#   Fraction_N_marine(cell) = CF(cell) / FFmar_XF(basin)  - the fraction of released N that
+#   reaches the sea (CF = export-to-sea x FF_mar x XF, so dividing by the per-BASIN marine
+#   tail FFmar_XF leaves the export fraction; <= 1 by construction).
+#   N_reaching(cell,crop) = L(cell,crop) * Fraction_N_marine  -> N ENTERING the receiving water.
 #   Atmospheric deposition is REMOVED from the IMAGE surplus so this does not double-count
 #   the separate airborne NH3 / NOx streams.
 #
@@ -29,10 +31,13 @@
 #                                                   split by each country's EEZ share of the LME
 #                                                   (an ASSUMPTION: impact placed uniformly in LME).
 #
-# OPTIONAL INPUT  "3. CFs/CF_marine_LME.csv"  (columns: LME_nb_f_1, CF_marine) - the MARINE-ONLY
-#   CF, kg O2 per kg N ENTERING each sub-segment (fate x effect of Cosme & Hauschild at the
-#   sub-segment level of Vea et al. - MUST be the same vintage baked into CF_arable_final.tif).
-#   If the file is absent the pipeline runs unchanged and N_reaching_MtN is written as NaN.
+# OPTIONAL INPUTS (both from c_make_FFmar_XF_basin.py, in "3. CFs"):
+#   FFmar_XF_basin.csv       marine tail XF/removal_final per RIVER BASIN, taken from
+#                            SOS_airgrid.xls - the table CF_arable itself was built from
+#                            (validated: CF/tail saturates at 1, p99 = 0.99).
+#   FFmar_XF_subsegment.csv  fallback for small basins absent from the 2-deg air grid:
+#                            the sub-segment's median tail, floored at the basin's max CF.
+#   Files absent -> the pipeline runs unchanged, the new columns are NaN.
 #
 # DOWNLOAD STATUS (important)
 #   Harvested_area_1961-2020.h5 may still be downloading (~2.8 GB complete). If it cannot be
@@ -66,7 +71,8 @@ AREA_FILE   = os.path.join(ADAL_DIR, "Harvested_area_1961-2020.h5")
 BASIN_SHP   = os.path.join(SHAPES, "3_BasinID_shape_PCR2", "BasinID_PCR2.shp")
 MOUTH_CSV   = os.path.join(HERE, "MouthID_PCR2.csv")
 LME_SHP     = os.path.join(SHAPES, "2_LME shape files", "cLME_ss_full.shp")
-CFM_CSV     = os.path.join(HERE, "3. CFs", "CF_marine_LME.csv")   # marine-only CF per sub-segment (optional)
+FFX_CSV     = os.path.join(HERE, "3. CFs", "FFmar_XF_basin.csv")       # marine tail per river basin (optional)
+FFS_CSV     = os.path.join(HERE, "3. CFs", "FFmar_XF_subsegment.csv")  # sub-segment fallback (optional)
 
 CTRY_SHP    = os.path.join(SHAPES, "1_World_Countries", "World_Countries.shp")
 EEZ_SHP     = os.path.join(SHAPES, "4_World_EEZ_v11", "eez_v11.shp")
@@ -134,18 +140,32 @@ xwalk["BasinID"] = xwalk["BasinID"].astype("Int64")
 pts = pts.merge(xwalk, on="BasinID", how="left")                   # cell -> basin -> LME
 print("A3  BasinID -> LME crosswalk merged")
 
-#   PLUS: marine-only CF of the receiving sub-segment - the divisor that backs the delivered
-#   N out of the impact (tolerant label key: '10', '10.0' and '10_0' all match).
-_k = lambda s: s.astype(str).str.replace(r"\.0$", "", regex=True).str.replace(r"_0$", "", regex=True)
-if os.path.exists(CFM_CSV):
-    cfm = pd.read_csv(CFM_CSV)[["LME_nb_f_1", "CF_marine"]]
-    cfm["_key"] = _k(cfm["LME_nb_f_1"])
-    pts["_key"] = _k(pts["LME_nb_f_1"])
-    pts = pts.merge(cfm[["_key", "CF_marine"]], on="_key", how="left").drop(columns="_key")
-    print("A3  CF_marine merged:", int(pts["CF_marine"].notna().sum()), "of", len(pts), "cells")
+#   PLUS: the marine tail XF/removal_final of each cell's BASIN (SOS_airgrid vintage - the
+#   one CF_arable was built from; validated: CF/tail saturates at 1). Small basins missing
+#   from the 2-deg air grid fall back to their sub-segment's median tail, floored at the
+#   basin's own max CF (export fraction <= 1); residual join noise is clipped at 1, counted.
+if os.path.exists(FFX_CSV):
+    ffx = pd.read_csv(FFX_CSV)[["BasinID", "FFmar_XF"]]
+    ffx["BasinID"] = ffx["BasinID"].astype("Int64")
+    pts = pts.merge(ffx, on="BasinID", how="left")
+    n_basin = int(pts["FFmar_XF"].notna().sum())
+    if os.path.exists(FFS_CSV):
+        ssm = pd.read_csv(FFS_CSV)
+        _k = lambda x: x.astype(str).str.replace(r"\.0$", "", regex=True).str.replace(r"_0$", "", regex=True)
+        tail_ss = _k(pts["LME_nb_f_1"]).map(dict(zip(_k(ssm["LME_nb_f_1"]), ssm["FFmar_XF_ss"])))
+        cfmax   = pts.groupby("BasinID")["CF"].transform("max")
+        miss    = pts["FFmar_XF"].isna()
+        pts.loc[miss, "FFmar_XF"] = np.fmax(tail_ss[miss], cfmax[miss])
+    fr = pts["CF"] / pts["FFmar_XF"]
+    n_clip = int((fr > 1.0001).sum())
+    pts["Fraction_N_marine"] = fr.clip(upper=1.0)
+    print("A3  marine tail: %d cells per-basin, %d via sub-segment fallback, %d unmatched | %d clipped at 1"
+          % (n_basin, int(pts["FFmar_XF"].notna().sum()) - n_basin,
+             int(pts["FFmar_XF"].isna().sum()), n_clip))
 else:
-    pts["CF_marine"] = np.nan
-    print("A3  NOTE: '3. CFs/CF_marine_LME.csv' not found -> N_reaching_MtN will be NaN")
+    pts["Fraction_N_marine"] = np.nan
+    print("A3  NOTE: '3. CFs/FFmar_XF_basin.csv' not found (run c_make_FFmar_XF_basin.py)"
+          " -> Fraction_N_marine / N_reaching_MtN will be NaN")
 
 # %% A4) GEO-JOIN 3 of 3 : each cell  ->  the PRODUCER country (where the crop N is applied)
 #   WHY : this is the country credited with PRODUCING the leaching (renamed Country_producer in
@@ -168,7 +188,7 @@ if miss.any():
     pts.loc[miss, "Country"] = pts.loc[miss, "fid"].map(nn)        # fill only the misses
 
 cells = pd.DataFrame(pts.drop(columns="geometry"))[
-    ["fid", "longitude", "latitude", "CF", "CF_marine", "cid",
+    ["fid", "longitude", "latitude", "CF", "Fraction_N_marine", "cid",
      "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m", "Country"]]
 cells.to_csv(os.path.join(OUTDIR, "cell_attributes_static.csv"), index=False)
 print("A4  static cells:", len(cells), "-> saved cell_attributes_static.csv")
@@ -268,12 +288,12 @@ adal["P"]     = adal["Nsyn"] * adal["LF_c"] + adal["Nman"] * organic_lf
 adal = adal[adal["P"] > 0].copy()
 adal["share"] = adal["P"] / adal.groupby("cid")["P"].transform("sum")     # crop share within each 0.5 deg box
 alloc = adal[["fid", "cid", "crop", "lf_class", "share",
-              "longitude", "latitude", "CF", "CF_marine", "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m", "Country"]]
+              "longitude", "latitude", "CF", "Fraction_N_marine", "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m", "Country"]]
 print("A5d (cell x crop) allocation rows:", len(alloc))
-fex = (alloc["CF"] / alloc["CF_marine"]).dropna()   # export fraction: share of released N reaching the sea; must be <= 1
+fex = alloc["Fraction_N_marine"].dropna()           # share of released N reaching the sea; must be <= 1
 if len(fex):
-    print("A5d export fraction CF/CF_marine: median %.3f | max %.3f%s"
-          % (fex.median(), fex.max(), "   << >1: CF_marine WRONG VINTAGE/LEVEL" if fex.max() > 1.001 else ""))
+    print("A5d Fraction_N_marine: median %.3f | max %.3f%s"
+          % (fex.median(), fex.max(), "   << >1: FFmar_XF WRONG VINTAGE" if fex.max() > 1.001 else ""))
 if SAVE_ADAL_SPLIT:
     _split_cols = ["fid", "longitude", "latitude", "cid", "crop", "lf_class",
                    "Nsyn", "Nman", "LF_c", "P", "share", "CF",
@@ -322,7 +342,7 @@ for Y in YEARS:
     a = alloc.merge(box[["cid", "L_box"]], on="cid", how="left")
     a["crop_leaching_MtN"] = a["L_box"] * a["share"]         # split the box total by crop share
     a["eutrophication"]    = a["crop_leaching_MtN"] * KG_PER_MT * a["CF"]   # result in kg O2 (marine O2 depletion) = kg N x CF[kg O2 per kg N] (Cosme & Hauschild)
-    a["N_reaching_MtN"]    = a["eutrophication"] / a["CF_marine"] / KG_PER_MT   # Mt N ENTERING the sub-segment's water (NaN without CF_marine)
+    a["N_reaching_MtN"]    = a["crop_leaching_MtN"] * a["Fraction_N_marine"]    # Mt N ENTERING the receiving water (NaN without FFmar_XF)
 
     # ---- DATABASE 1 : the honest per-(cell, crop) result -- NO receptor assumption ----------------
     #   One row per producing cell x crop. Country_producer = where the N is applied; LME_nb_f_1 =
@@ -331,7 +351,7 @@ for Y in YEARS:
     out = a.dropna(subset=["crop_leaching_MtN"]).rename(columns={"Country": "Country_producer"})
     out.insert(0, "year", Y)
     db1 = out[["year", "fid", "longitude", "latitude", "crop", "lf_class", "Country_producer",
-               "CF", "CF_marine", "cid", "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m",
+               "CF", "Fraction_N_marine", "cid", "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m",
                "crop_leaching_MtN", "N_reaching_MtN", "eutrophication"]]
     db1.to_csv(os.path.join(OUTDIR, "crop_eutrophication_%d.csv" % Y), index=False)
     rtxt = ("%.3f" % db1["N_reaching_MtN"].sum()) if db1["N_reaching_MtN"].notna().any() else "n/a"

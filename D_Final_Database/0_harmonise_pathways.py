@@ -24,11 +24,12 @@
 #                       uses World_Countries. An alias map reconciles the known
 #                       differences; anything still unmatched is REPORTED, not dropped.
 #   CF_kgO2_per_kg = eutrophication / release  (an EFFECTIVE, result-side ratio).
-#     - delivered_kgN = the N actually ENTERING the receiving sub-segment's water, for EVERY
-#       pathway alike:  eutrophication_kgO2 / CF_marine(LME_nb_f_1), with CF_marine (kg O2 per
-#       kg N entering; same Vea/Cosme vintage as the applied CFs) read from
-#       A_agricultural_leaching/"3. CFs"/CF_marine_LME.csv.  File absent -> column is NaN.
-#       release_kgN - delivered_kgN = the land/air transport loss the one-step CF absorbs.
+#     - delivered_kgN = the N actually ENTERING the receiving water. For crop/grazing it is
+#       the pipelines' N_reaching_MtN column (leaching x Fraction_N_marine, per-BASIN marine
+#       tail from FFmar_XF_basin.csv) summed like the other columns - so the leaching DB1s
+#       must have been produced by the updated pipelines, else the column is NaN. For the AIR
+#       pathways it stays NaN: their marine tails are cell-level and cannot be recovered at
+#       (country x sector x LME) level. release_kgN - delivered_kgN = the transport loss.
 #
 # HOW TO RUN: whole file, or cell-by-cell ('# %%'). Runtime is dominated by
 # streaming the large crop CSVs (a few minutes). Needs pandas (+ pyarrow for parquet).
@@ -63,6 +64,9 @@ COUNTRY_ALIAS = {                     # verified against 5_LME_Country_match nam
     "Comores": "Comoros",
     "Saint Vincent and the Grenadines": "St. Vincent and the Grenadines",
     "Saint Lucia": "St. Lucia",
+    "Grand Duchy of Luxembourg": "Luxembourg",
+    "Republic of Mauritius": "Mauritius",
+    "Saint Kitts and Nevis": "St. Kitts and Nevis",
 }   # anything else that differs shows up in the printed report -> extend here
 def fix_country(s):
     return s.replace(COUNTRY_ALIAS)
@@ -90,15 +94,18 @@ for pathway, sub_dir, fname, act_col in [
         usecols = ["Country_producer", "LME_nb_f_1", leach_col, "eutrophication"]
         if act_col:
             usecols.insert(1, act_col)
+        has_reach = "N_reaching_MtN" in pd.read_csv(f, nrows=0).columns  # updated pipelines only
+        vals = [leach_col, "eutrophication"] + (["N_reaching_MtN"] if has_reach else [])
         keys = ["Country_producer"] + ([act_col] if act_col else []) + ["LME_nb_f_1"]
         parts = []
-        for ch in pd.read_csv(f, usecols=usecols, dtype={"LME_nb_f_1": str}, chunksize=5_000_000):
+        for ch in pd.read_csv(f, usecols=usecols + (["N_reaching_MtN"] if has_reach else []),
+                              dtype={"LME_nb_f_1": str}, chunksize=5_000_000):
             ch = ch.dropna(subset=["LME_nb_f_1"])
-            parts.append(ch.groupby(keys, as_index=False)[[leach_col, "eutrophication"]].sum())
+            parts.append(ch.groupby(keys, as_index=False)[vals].sum(min_count=1))
         if not parts:
             continue
         d = (pd.concat(parts, ignore_index=True)
-               .groupby(keys, as_index=False)[[leach_col, "eutrophication"]].sum()
+               .groupby(keys, as_index=False)[vals].sum(min_count=1)
                .rename(columns={leach_col: "MtN", "eutrophication": "eutro"}))
         d["pathway"]   = pathway
         d["substance"] = "N_leached"
@@ -107,10 +114,12 @@ for pathway, sub_dir, fname, act_col in [
         d["activity"]  = d[act_col] if act_col else "grazing"
         d["release_kg"]  = d["MtN"] * KG_PER_MT          # kg N leached
         d["release_kgN"] = d["release_kg"]               # already nitrogen
+        d["delivered_kgN"] = d["N_reaching_MtN"] * KG_PER_MT if has_reach else np.nan   # N entering the water
         d = d.rename(columns={"Country_producer": "emission_country",
                               "eutro": "eutrophication_kgO2"})
         frames.append(d[["pathway", "substance", "year", "emission_country", "activity_type",
-                         "activity", "LME_nb_f_1", "release_kg", "release_kgN", "eutrophication_kgO2"]])
+                         "activity", "LME_nb_f_1", "release_kg", "release_kgN", "delivered_kgN",
+                         "eutrophication_kgO2"]])
         print("%-8s %d : %6d (country x activity x LME) rows | %.3e kg O2" %
               (pathway, Y, len(d), d["eutrophication_kgO2"].sum()))
 
@@ -151,8 +160,10 @@ for pathway, dir_, nfac in [("NH3", B_DIR, N_IN_NH3), ("NOx", C_DIR, N_IN_NO2)]:
     g = g.rename(columns={"IPCC_sector": "activity", "impact_kgO2": "eutrophication_kgO2",
                           "emission_kg": "release_kg"})
     g["release_kgN"] = g["release_kg"] * nfac
+    g["delivered_kgN"] = np.nan     # air marine tails are cell-level; not recoverable at pair level
     frames.append(g[["pathway", "substance", "year", "emission_country", "activity_type",
-                     "activity", "LME_nb_f_1", "release_kg", "release_kgN", "eutrophication_kgO2"]])
+                     "activity", "LME_nb_f_1", "release_kg", "release_kgN", "delivered_kgN",
+                     "eutrophication_kgO2"]])
     print("%-8s     : %7d rows | %.3e kg O2" % (pathway, len(g), g["eutrophication_kgO2"].sum()))
 
 # %% 3) stack, effective CF, country-name check, save
@@ -161,23 +172,13 @@ if not frames:
 H = pd.concat(frames, ignore_index=True)
 H["CF_kgO2_per_kg"] = H["eutrophication_kgO2"] / H["release_kg"]
 
-# delivered N: impact / marine-only CF of the receiving sub-segment (uniform for all pathways)
-CFM_CSV = os.path.join(A_DIR, "3. CFs", "CF_marine_LME.csv")
-if os.path.exists(CFM_CSV):
-    cfm = pd.read_csv(CFM_CSV)[["LME_nb_f_1", "CF_marine"]]
-    cfm["_key"] = (cfm["LME_nb_f_1"].astype(str).str.replace(r"\.0$", "", regex=True)
-                                               .str.replace(r"_0$", "", regex=True))
-    H["_key"] = (H["LME_nb_f_1"].astype(str).str.replace(r"\.0$", "", regex=True)
-                                            .str.replace(r"_0$", "", regex=True))
-    H = H.merge(cfm[["_key", "CF_marine"]], on="_key", how="left").drop(columns="_key")
-    H["delivered_kgN"] = H["eutrophication_kgO2"] / H["CF_marine"]
-    n_miss = int(H["CF_marine"].isna().sum())
-    if n_miss:
-        print("delivered_kgN: %d rows with no CF_marine for their LME -> NaN" % n_miss)
-    H = H.drop(columns="CF_marine")
+# delivered_kgN was filled per pathway above: agriculture from the pipelines' N_reaching_MtN
+# (per-basin marine tail), air = NaN by construction.
+if H["delivered_kgN"].notna().any():
+    print("delivered_kgN: agriculture rows filled (from the pipelines' N_reaching_MtN)")
 else:
-    H["delivered_kgN"] = np.nan
-    print("NOTE: %s not found -> delivered_kgN = NaN (add the marine-only CF lookup and re-run)" % CFM_CSV)
+    print("NOTE: delivered_kgN all NaN - re-run the leaching pipelines with "
+          "'3. CFs/FFmar_XF_basin.csv' (c_make_FFmar_XF_basin.py) first")
 
 H = H[["pathway", "substance", "year", "emission_country", "activity_type", "activity",
        "LME_nb_f_1", "release_kg", "release_kgN", "delivered_kgN", "CF_kgO2_per_kg", "eutrophication_kgO2"]]
