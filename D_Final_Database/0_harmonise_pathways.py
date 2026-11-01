@@ -11,7 +11,7 @@
 #   into  eutrophication_all_pathways.parquet  (in THIS folder, D_Final_Database)
 #
 #     pathway | substance | year | emission_country | activity_type | activity |
-#     LME_nb_f_1 | release_kg | release_kgN | delivered_kgN | CF_kgO2_per_kg | eutrophication_kgO2
+#     LME_nb_f_1 | release_kg | release_kgN | delivered_kgN | CF_kgO2_per_kg | CF_kgO2_per_kgN | eutrophication_kgO2
 #
 #   HARMONISED ON PURPOSE:
 #     - activity      = crop name / 'grazing' / IPCC sector  (activity_type says which)
@@ -23,7 +23,9 @@
 #     - country names : air uses the EEZ union's SOVEREIGN1 spelling; agriculture
 #                       uses World_Countries. An alias map reconciles the known
 #                       differences; anything still unmatched is REPORTED, not dropped.
-#   CF_kgO2_per_kg = eutrophication / release  (an EFFECTIVE, result-side ratio).
+#   CF_kgO2_per_kg  = eutrophication / release_kg   (EFFECTIVE ratio per kg of the RELEASED species:
+#                     kg N for leaching, kg NH3 / kg NO2 for air - not comparable across pathways)
+#   CF_kgO2_per_kgN = eutrophication / release_kgN  (per kg N - comparable across all pathways)
 #     - delivered_kgN = the N actually ENTERING the receiving water. For crop/grazing it is
 #       the pipelines' N_reaching_MtN column (leaching x Fraction_N_marine, per-BASIN marine
 #       tail from FFmar_XF_basin.csv) summed like the other columns - so the leaching DB1s
@@ -170,7 +172,8 @@ for pathway, dir_, nfac in [("NH3", B_DIR, N_IN_NH3), ("NOx", C_DIR, N_IN_NO2)]:
 if not frames:
     raise SystemExit("No pathway data found - run the pipelines first.")
 H = pd.concat(frames, ignore_index=True)
-H["CF_kgO2_per_kg"] = H["eutrophication_kgO2"] / H["release_kg"]
+H["CF_kgO2_per_kg"]  = H["eutrophication_kgO2"] / H["release_kg"]
+H["CF_kgO2_per_kgN"] = H["eutrophication_kgO2"] / H["release_kgN"]
 
 # delivered_kgN was filled per pathway above: agriculture from the pipelines' N_reaching_MtN
 # (per-basin marine tail), air = NaN by construction.
@@ -181,7 +184,8 @@ else:
           "'3. CFs/FFmar_XF_basin.csv' (c_make_FFmar_XF_basin.py) first")
 
 H = H[["pathway", "substance", "year", "emission_country", "activity_type", "activity",
-       "LME_nb_f_1", "release_kg", "release_kgN", "delivered_kgN", "CF_kgO2_per_kg", "eutrophication_kgO2"]]
+       "LME_nb_f_1", "release_kg", "release_kgN", "delivered_kgN", "CF_kgO2_per_kg", "CF_kgO2_per_kgN",
+       "eutrophication_kgO2"]]
 
 # country-name reconciliation report: air names that never appear on the agriculture side
 ag  = set(H.loc[H["pathway"].isin(["crop", "grazing"]), "emission_country"].dropna())

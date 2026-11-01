@@ -3,7 +3,7 @@
 # Grazing (cattle) nitrogen leaching -> marine eutrophication, per 5 arcmin cell, 2015-2022.
 #
 # Per cell:
-#   IMAGE pasture NO3 (0.5 deg, Tg N)  --split equally over the n_valid CF cells in the box-->
+#   IMAGE pasture N surplus minus atmospheric deposition (0.5 deg, Tg N)  --split equally over the n_valid CF cells in the box-->
 #   grazing_leaching (Tg N)  --x 1e9-->  kg N  --x CF (Cosme & Hauschild, per kg N)-->  eutrophication
 #   Fraction_N_marine = CF / FFmar_XF(basin)  (share of released N reaching the sea, <= 1)
 #   N_reaching = grazing_leaching * Fraction_N_marine  -> kg N ENTERING the receiving water
@@ -177,6 +177,9 @@ lme_ctry = pd.read_csv(LME_CTRY_MATCH).rename(
     columns={"LME_subsegment": "LME_nb_f_1", "Country": "receptor_country", "LME_area_portion": "area_portion"})
 lme_psum = lme_ctry.groupby("LME_nb_f_1", as_index=False)["area_portion"].sum().rename(columns={"area_portion": "portion_sum"})
 print("A5e  LME->receptor match:", lme_ctry["LME_nb_f_1"].nunique(), "sub-segments,", lme_ctry["receptor_country"].nunique(), "countries")
+_miss = sorted(set(cells["LME_nb_f_1"].dropna().astype(str)) - set(lme_ctry["LME_nb_f_1"].astype(str)))
+if _miss:   # such LMEs would be booked 100% to 'High seas (ABNJ)' in DB2 - check label formats (X vs X_0, X_1 vs X_10)
+    print("A5e  WARNING: %d LME label(s) of the cells are absent from LME_country_match.csv: %s" % (len(_miss), ", ".join(_miss[:15])))
 
 for Y in YEARS:
     # B1) IMAGE pasture N surplus for year Y (Tg N per 0.5 deg box); exact on a step, else interpolated

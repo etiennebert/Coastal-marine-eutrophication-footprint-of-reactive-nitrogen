@@ -10,12 +10,14 @@
 #                             hidden state: every line leaves a plain pandas/numpy variable
 #                             (cf, pts, cells, adal, alloc, box, out, db1, db2) you can open in the
 #                             Variable Explorer and inspect.
-#   * PART A (the two spatial joins) is the slow part (a few minutes) and only has to run
-#     ONCE. After it, you can re-run PART B (the yearly loop) as often as you like - it's fast.
+#   * PART A (the two spatial joins) is slow (a few minutes) and only has to run ONCE.
+#     PART B (the yearly loop) builds the Adalibieke crop weights of EACH year (2015-2020,
+#     2021-2022 reuse 2020) - minutes per year the first time, then cached as parquet.
 #
 # METHOD   (P = leaching potential = the weight; IMAGE fixes the magnitude, the weights split it)
 #   per 0.5 deg box g:  L(cell,crop) = L_box(g) * P / sum(P over the box),
-#                       P = Nsyn*LF_crop + Nman*LF_organic
+#                       P = Nsyn*LF_crop + Nman*LF_organic   (Nsyn, Nman = Adalibieke rate x
+#                       harvested area of the SAME year; 2021-2022 use the 2020 pattern)
 #   E(cell,crop) = L(cell,crop) * 1e9 (kgN per MtN) * CF(cell)          -> marine eutrophication
 #   Fraction_N_marine(cell) = CF(cell) / FFmar_XF(basin)  - the fraction of released N that
 #   reaches the sea (CF = export-to-sea x FF_mar x XF, so dividing by the per-BASIN marine
@@ -84,7 +86,13 @@ SAVE_ADAL_SPLIT = True   # option: dump the per-(cell,crop) Adalibieke split to 
 
 YEARS     = range(2015, 2023)          # 2015..2022 (IMAGE leaching years)
 KG_PER_MT = 1e9                        # IMAGE 'MtN' = Mt N = 1e9 kg N ; CF is per kg N
-ADAL_YEAR = 2020                       # reference year for the crop weights (Adalibieke covers 1961-2020)
+ADAL_LAST  = 2020                      # Adalibieke covers 1961-2020: each study year uses its OWN crop weights,
+                                       # 2021-2022 reuse the 2020 pattern
+ADAL_CACHE = os.path.join(ADAL_DIR, "adal_split_%d_%s.parquet")  # per-year (cell x crop) split, cached after 1st build;
+                                       # keyed on year AND weight mode ('area' = rate x harvested area,
+                                       # 'rate' = draft fallback) so a draft split is never reused silently
+STRICT_WEIGHTS = True                  # publication runs: stop if harvested area is unusable or a crop file
+                                       # is missing (set False only for quick drafts)
 
 SYNTH_FORMS    = ["AA", "AN", "AS", "CAN", "NS", "ONS", "Urea", "AP", "NK", "NPK", "ONP"]  # 11 synthetic forms
 CROP_MAP       = [("maize", "Maize"), ("corn", "Maize"), ("wheat", "Wheat"),
@@ -208,99 +216,125 @@ print("A5a crop LFs:", crop_lf, "| organic LF:", organic_lf)
 #     The file may still be downloading. We test-read one dataset to catch a truncated file;
 #     if anything fails we drop to RATE-only (a valid draft). The loop in A5c is guarded too,
 #     so a partial file can NEVER crash the run.
-yi = ADAL_YEAR - 1961
 USE_AREA, area_h5, area_keys = False, None, []
 try:
     area_h5 = h5py.File(AREA_FILE, "r")
     area_keys = list(area_h5.keys())
-    _probe = area_h5[area_keys[0]][yi, :, :]                 # touch data -> raises if truncated
+    _probe = area_h5[area_keys[0]][ADAL_LAST - 1961, :, :]  # touch data -> raises if truncated
+    if not np.isfinite(_probe).any():
+        raise ValueError("all-NaN area slice")               # openable but empty -> RATE-only
     USE_AREA = True
     print("A5b harvested-area readable -> weight = rate x area (kg N per cell)")
 except Exception as e:
     USE_AREA = False
     print("A5b harvested-area NOT usable (%s) -> DRAFT weight = application RATE only" % type(e).__name__)
 
-# %% A5c) read each crop's N application (synthetic + manure) for year ADAL_YEAR -> table `adal`
-crop_files = sorted(glob.glob(os.path.join(ADAL_DIR, "N_application_rate_*_1961-2020.h5")))
-print("A5c Adalibieke crop files found:", len(crop_files))
-frames, skipped, rate_only_crops = [], [], []
-for f in crop_files:
-    crop = os.path.basename(f).replace("N_application_rate_", "").replace("_1961-2020.h5", "")
-    try:
-        h = h5py.File(f, "r")
-    except OSError:
-        skipped.append(crop); print("   SKIP %-14s (incomplete / still downloading)" % crop); continue
-    try:
-        present = set(h.keys())
-        nsyn = np.zeros((4320, 2160), dtype="float64")       # (lon, lat)
-        for form in SYNTH_FORMS:
+# %% A5c-A5d) Adalibieke crop weights for ONE year -> the (cell x crop) allocation table
+#   Called from PART B for every distinct weight year (2015 ... 2020; 2021-2022 reuse 2020).
+#   Reading the 21 crop files is the slow part (minutes per year), so the result is cached
+#   as adal_split_<year>.parquet in "2. N_application_rate" and reloaded on later runs.
+def adal_split(AY):
+    cache = ADAL_CACHE % (AY, "area" if USE_AREA else "rate")
+    if STRICT_WEIGHTS and not USE_AREA:
+        raise SystemExit("STRICT_WEIGHTS: harvested-area file unusable -> rate-only weights. Fix the download "
+                         "(a_download_adalibieke.py) or set STRICT_WEIGHTS = False for a draft run.")
+    if os.path.exists(cache):                                # cache = crop shares only; cell tags re-attached
+        alloc = pd.read_parquet(cache).merge(cells, on="fid", how="inner")   # so PART A changes stay effective
+        print("A5c-d Adalibieke %d split loaded from cache (%d rows)" % (AY, len(alloc)))
+        return alloc
+    yi = AY - 1961
+    print("A5c Adalibieke weights for year %d" % AY)
+    # A5c) read each crop's N application (synthetic + manure) for year AY -> table `adal`
+    crop_files = sorted(glob.glob(os.path.join(ADAL_DIR, "N_application_rate_*_1961-2020.h5")))
+    print("A5c Adalibieke crop files found:", len(crop_files))
+    frames, skipped, rate_only_crops = [], [], []
+    for f in crop_files:
+        crop = os.path.basename(f).replace("N_application_rate_", "").replace("_1961-2020.h5", "")
+        try:
+            h = h5py.File(f, "r")
+        except OSError:
+            skipped.append(crop); print("   SKIP %-14s (incomplete / still downloading)" % crop); continue
+        try:
+            present = set(h.keys())
+            nsyn = np.zeros((4320, 2160), dtype="float64")       # (lon, lat)
+            for form in SYNTH_FORMS:
+                for place in ("_deep", "_surface"):
+                    if form + place in present:
+                        nsyn += np.nan_to_num(h[form + place][yi, :, :].astype("float64"))
+            nman = np.zeros((4320, 2160), dtype="float64")
             for place in ("_deep", "_surface"):
-                if form + place in present:
-                    nsyn += np.nan_to_num(h[form + place][yi, :, :].astype("float64"))
-        nman = np.zeros((4320, 2160), dtype="float64")
-        for place in ("_deep", "_surface"):
-            if "MA" + place in present:
-                nman += np.nan_to_num(h["MA" + place][yi, :, :].astype("float64"))
-    except (OSError, KeyError):
-        skipped.append(crop); h.close(); print("   SKIP %-14s (partial read)" % crop); continue
-    h.close()
+                if "MA" + place in present:
+                    nman += np.nan_to_num(h["MA" + place][yi, :, :].astype("float64"))
+        except (OSError, KeyError):
+            skipped.append(crop); h.close(); print("   SKIP %-14s (partial read)" % crop); continue
+        h.close()
 
-    # optional rate -> amount: multiply by harvested area (ha). Guarded: if this crop's area
-    # slice is missing/truncated, keep the rate weight instead of crashing.
-    if USE_AREA:
-        match = [k for k in area_keys if k.lower() == crop.lower()]
-        if match:
-            try:
-                area = np.nan_to_num(area_h5[match[0]][yi, :, :].astype("float64"))
-                nsyn, nman = nsyn * area, nman * area
-            except Exception:
-                rate_only_crops.append(crop)
+        # optional rate -> amount: multiply by harvested area (ha). Guarded: if this crop's area
+        # slice is missing/truncated, keep the rate weight instead of crashing.
+        if USE_AREA:
+            match = [k for k in area_keys if k.lower() == crop.lower()]
+            if match:
+                try:
+                    area = np.nan_to_num(area_h5[match[0]][yi, :, :].astype("float64"))
+                    nsyn, nman = nsyn * area, nman * area
+                except Exception:
+                    rate_only_crops.append(crop)
+            else:
+                rate_only_crops.append(crop + " (no area key)")
 
-    keep = (nsyn + nman) > 0
-    ci, ri = np.where(keep)                                  # ci = lon index, ri = lat index
-    lon = -180.0 + (ci + 0.5) / 12.0
-    lat = 90.0 - (ri + 0.5) / 12.0
-    frames.append(pd.DataFrame({"longitude": lon, "latitude": lat, "crop": crop,
-                                "Nsyn": nsyn[keep], "Nman": nman[keep]}))
-    print("   %-14s cells=%d" % (crop, int(keep.sum())))
+        keep = (nsyn + nman) > 0
+        ci, ri = np.where(keep)                                  # ci = lon index, ri = lat index
+        lon = -180.0 + (ci + 0.5) / 12.0
+        lat = 90.0 - (ri + 0.5) / 12.0
+        frames.append(pd.DataFrame({"longitude": lon, "latitude": lat, "crop": crop,
+                                    "Nsyn": nsyn[keep], "Nman": nman[keep]}))
+        print("   %-14s cells=%d" % (crop, int(keep.sum())))
 
-if area_h5 is not None:
-    area_h5.close()
-if skipped:
-    print("   NOTE: %d crop(s) skipped (still downloading): %s" % (len(skipped), ", ".join(skipped)))
-if rate_only_crops:
-    print("   NOTE: %d crop(s) used RATE-only (area read failed): %s" % (len(rate_only_crops), ", ".join(rate_only_crops)))
-if not frames:
-    raise SystemExit("No crop files could be read - finish the download (a_download_adalibieke.py) first.")
+    if skipped:
+        print("   NOTE: %d crop(s) skipped (still downloading): %s" % (len(skipped), ", ".join(skipped)))
+        if STRICT_WEIGHTS:
+            raise SystemExit("STRICT_WEIGHTS: incomplete Adalibieke download - finish it before a publication run.")
+    if rate_only_crops:
+        print("   NOTE: %d crop(s) used RATE-only (area missing/failed): %s" % (len(rate_only_crops), ", ".join(rate_only_crops)))
+        if STRICT_WEIGHTS:   # rate (kg N/ha) and amount (kg N) weights cannot be mixed inside one box
+            raise SystemExit("STRICT_WEIGHTS: no harvested area for %s - fix the area file or the crop name "
+                             "match, or set STRICT_WEIGHTS = False for a draft run." % ", ".join(rate_only_crops))
+    if not frames:
+        raise SystemExit("No crop files could be read - finish the download (a_download_adalibieke.py) first.")
 
-adal = pd.concat(frames, ignore_index=True)
-print("A5c crop rows:", len(adal), "| crops used:", sorted(adal["crop"].unique()))
+    adal = pd.concat(frames, ignore_index=True)
+    print("A5c crop rows:", len(adal), "| crops used:", sorted(adal["crop"].unique()))
 
-# %% A5d) leaching potential P per (cell, crop), and each crop's SHARE inside its 0.5 deg box
-adal["fid"] = (np.floor((90 - adal["latitude"]) * 12).astype(int) * 4320
-               + np.floor((adal["longitude"] + 180) * 12).astype(int))
-adal = adal.drop(columns=["longitude", "latitude"]).merge(cells, on="fid", how="inner")   # onto CF mask + tags
-adal["lf_class"] = OTHER_LF_CLASS
-for key, cls in CROP_MAP:
-    adal.loc[adal["crop"].str.lower().str.contains(key), "lf_class"] = cls
-adal["LF_c"]  = adal["lf_class"].map(crop_lf).fillna(crop_lf.get(OTHER_LF_CLASS, np.nan))
-adal["P"]     = adal["Nsyn"] * adal["LF_c"] + adal["Nman"] * organic_lf
-adal = adal[adal["P"] > 0].copy()
-adal["share"] = adal["P"] / adal.groupby("cid")["P"].transform("sum")     # crop share within each 0.5 deg box
-alloc = adal[["fid", "cid", "crop", "lf_class", "share",
-              "longitude", "latitude", "CF", "Fraction_N_marine", "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m", "Country"]]
-print("A5d (cell x crop) allocation rows:", len(alloc))
-fex = alloc["Fraction_N_marine"].dropna()           # share of released N reaching the sea; must be <= 1
-if len(fex):
-    print("A5d Fraction_N_marine: median %.3f | max %.3f%s"
-          % (fex.median(), fex.max(), "   << >1: FFmar_XF WRONG VINTAGE" if fex.max() > 1.001 else ""))
-if SAVE_ADAL_SPLIT:
-    _split_cols = ["fid", "longitude", "latitude", "cid", "crop", "lf_class",
-                   "Nsyn", "Nman", "LF_c", "P", "share", "CF",
-                   "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m", "Country"]
-    _sp = os.path.join(ADAL_DIR, "adalibieke_crop_split_check.csv")
-    adal[_split_cols].to_csv(_sp, index=False)
-    print("A5d saved Adalibieke split -> 2. N_application_rate/adalibieke_crop_split_check.csv (%d rows)" % len(adal))
+    # A5d) leaching potential P per (cell, crop), and each crop's SHARE inside its 0.5 deg box
+    adal["fid"] = (np.floor((90 - adal["latitude"]) * 12).astype(int) * 4320
+                   + np.floor((adal["longitude"] + 180) * 12).astype(int))
+    adal = adal.drop(columns=["longitude", "latitude"]).merge(cells, on="fid", how="inner")   # onto CF mask + tags
+    adal["lf_class"] = OTHER_LF_CLASS
+    for key, cls in CROP_MAP:
+        adal.loc[adal["crop"].str.lower().str.contains(key), "lf_class"] = cls
+    adal["LF_c"]  = adal["lf_class"].map(crop_lf).fillna(crop_lf.get(OTHER_LF_CLASS, np.nan))
+    adal["P"]     = adal["Nsyn"] * adal["LF_c"] + adal["Nman"] * organic_lf
+    adal = adal[adal["P"] > 0].copy()
+    adal["share"] = adal["P"] / adal.groupby("cid")["P"].transform("sum")     # crop share within each 0.5 deg box
+    alloc = adal[["fid", "cid", "crop", "lf_class", "share",
+                  "longitude", "latitude", "CF", "Fraction_N_marine", "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m", "Country"]]
+    print("A5d (cell x crop) allocation rows:", len(alloc))
+    fex = alloc["Fraction_N_marine"].dropna()           # share of released N reaching the sea; must be <= 1
+    if len(fex):
+        print("A5d Fraction_N_marine: median %.3f | max %.3f%s"
+              % (fex.median(), fex.max(), "   << >1: FFmar_XF WRONG VINTAGE" if fex.max() > 1.001 else ""))
+    if SAVE_ADAL_SPLIT and AY == ADAL_LAST:   # one inspection file (~1.5 GB), as before: the 2020 split
+        _split_cols = ["fid", "longitude", "latitude", "cid", "crop", "lf_class",
+                       "Nsyn", "Nman", "LF_c", "P", "share", "CF",
+                       "BasinID", "LME_nb_f_1", "LME_NAME", "dist_m", "Country"]
+        _sp = os.path.join(ADAL_DIR, "adalibieke_crop_split_check.csv")
+        adal[_split_cols].to_csv(_sp, index=False)
+        print("A5d saved Adalibieke split -> 2. N_application_rate/%s (%d rows)" % (os.path.basename(_sp), len(adal)))
+    try:
+        alloc[["fid", "crop", "lf_class", "share"]].to_parquet(cache, index=False)
+    except Exception as e:
+        print("   (cache not written: %s)" % type(e).__name__)
+    return alloc
 
 
 # %% A5e SETUP) LME -> receptor-country crosswalk (validated), used in PART B's per-year loop.
@@ -314,6 +348,9 @@ lme_ctry = pd.read_csv(LME_CTRY_MATCH).rename(
     columns={"LME_subsegment": "LME_nb_f_1", "Country": "receptor_country", "LME_area_portion": "area_portion"})
 lme_psum = lme_ctry.groupby("LME_nb_f_1", as_index=False)["area_portion"].sum().rename(columns={"area_portion": "portion_sum"})
 print("A5e  LME->receptor match:", lme_ctry["LME_nb_f_1"].nunique(), "sub-segments,", lme_ctry["receptor_country"].nunique(), "countries")
+_miss = sorted(set(cells["LME_nb_f_1"].dropna().astype(str)) - set(lme_ctry["LME_nb_f_1"].astype(str)))
+if _miss:   # such LMEs would be booked 100% to 'High seas (ABNJ)' in DB2 - check label formats (X vs X_0, X_1 vs X_10)
+    print("A5e  WARNING: %d LME label(s) of the cells are absent from LME_country_match.csv: %s" % (len(_miss), ", ".join(_miss[:15])))
 
 
 # %% PART B) per year: IMAGE cropland leaching -> allocate to (cell, crop) -> x CF -> save
@@ -324,7 +361,11 @@ nodes = sorted(yr2i)                                         # IMAGE 5-yr steps 
 NSURP = (ds["NutrientSurplus"] - ds["AtmosphericDeposition"]).clip(min=0)
 
 
+AY_cur = None
 for Y in YEARS:
+    AY = min(Y, ADAL_LAST)                                   # crop weights of the SAME year (2020 pattern after 2020)
+    if AY != AY_cur:
+        alloc, AY_cur = adal_split(AY), AY
     y0 = max(y for y in nodes if y <= Y)                     # bracket Y between IMAGE steps
     y1 = min(y for y in nodes if y >= Y)
     if y1 == y0:
@@ -390,4 +431,6 @@ for Y in YEARS:
           % (len(db2), db2["eutrophication"].sum(), Y))
 
 ds.close()
+if area_h5 is not None:
+    area_h5.close()
 print("DONE -- per-year crop files written to", OUTDIR)

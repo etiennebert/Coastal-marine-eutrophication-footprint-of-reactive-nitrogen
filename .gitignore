@@ -52,6 +52,8 @@
 !**/Wang2025_leaching_factors.csv
 !A_agricultural_leaching/MouthID_PCR2.csv
 !0_shape_files/0_gridcells_LME_mapped.csv
+!0_shape_files/5_LME_Country_match/LME_country_match.csv
+!D_Final_Database/country_to_continent.csv
 #  To ALSO publish a specific small result table, add a line such as:
 #     !B_airborne_NH3/NH3_impact_by_country_sector.csv
 #     !C_airborne_NOx/NOx_impact_by_country_sector.csv
@@ -60,9 +62,20 @@
 # ------------- Regenerable model outputs -------------
 A_agricultural_leaching/5. outputs_crops/
 A_agricultural_leaching/6. outputs_grazing/
+D_Final_Database/*.xlsx
+D_Final_Database/5. outputs_crops/
 
-# ------------- Kept local only (not part of the published repo/archive) -------------
-F_Practical_case/
+# ------------- Case study: scripts tracked, generated results/figures kept local -------------
+F_Practical_case/1. results/
+F_Practical_case/1. results_anchored/
+F_Practical_case/2. figures/
+F_Practical_case/*.docx
+F_Practical_case/*.xlsx
+F_Practical_case/.RData
+F_Practical_case/.Rhistory
+
+# ------------- Regenerable result tables of the anchored batch -------------
+E_MRIO_GLORIA_Satellites/PBA_before_after_*.xlsx
 
 # ------------- Archived / scratch / superseded -------------
 **/0. Old/

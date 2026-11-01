@@ -9,8 +9,13 @@ EMISSION COUNTRY x LME.   (identical machinery to the NOx version)
   receptor cell -> LME via the area-weighted spatial mapping.
   CF applied as the full source->receptor matrix, collapsed once: CF_to_LME = CF @ M.
 
-NOTE: CF_NHx is per kg NH3 EMITTED (the MATLAB normalises by emission_nhx), so EDGAR
-NH3 is fed straight in (tonnes -> kg), no N conversion -- exactly as for NOx.
+UNITS (corrected Nov 2026): the CF matrices are per kg of NITROGEN emitted
+(Vea et al. 2024, Int J LCA 29:1738: "air emission CFs represent impact per kg NOx-N
+or NHx-N"). EDGAR reports emissions as kg of SPECIES (NH3, and NOx as NO2), so every
+CF block is multiplied by N_PER_KG_SPECIES (14/17 for NH3, 14/46 for NOx) right after
+it is read. From that point on all CFs are per kg of EDGAR species, the emission
+columns stay in species mass (unchanged names), and impact = species mass x CF.
+Earlier runs omitted this factor and overstated impacts x17/14 (NH3) and x46/14 (NOx).
 Requires: numpy, pandas, geopandas, rasterio.
 """
 # ---------------------------------------------------------------------------
@@ -79,6 +84,7 @@ print("input db:", os.path.basename(EDGAR), "| outputs ->", NH3_OUT)
 NLAT, NLON = 91, 144
 N = NLAT * NLON
 TONNES_TO_KG = 1.0e3
+N_PER_KG_SPECIES = 14.0 / 17.0   # kg N per kg NH3: CF matrix is per kg N -> per kg NH3
 COUNTRY_FIELD = "SOVEREIGN1"
 
 # %% 1) GEO-STEP 1 of 2 : rasterize the EEZ-land union -> 0.1 deg COUNTRY-index grid
@@ -168,7 +174,7 @@ cell_impact_year = {Y: np.zeros(N) for Y in years_sorted}   # impact per RECEPTO
 colsum = np.zeros(N)   # per-receptor CF = sum over sources of CF(z,j)
 CFL = np.zeros((N, Ln)); rowsum = np.zeros(N); r0 = 0
 for ch in pd.read_csv(CF_FILE, header=None, dtype=np.float32, chunksize=2000):
-    blk = ch.values; k = blk.shape[0]
+    blk = ch.values * N_PER_KG_SPECIES; k = blk.shape[0]   # per kg N -> per kg NH3 (see UNITS note)
     CFL[r0:r0 + k] = blk @ M
     rowsum[r0:r0 + k] = blk.sum(axis=1)   # total kg O2 per kg emitted over ALL receptors (mapped+inland)
     for Y in years_sorted:                    # receptor impact_Y(j) = sum_z emis_Y(z)*CF(z,j)
