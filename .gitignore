@@ -76,6 +76,9 @@ F_Practical_case/.Rhistory
 
 # ------------- Regenerable result tables of the anchored batch -------------
 E_MRIO_GLORIA_Satellites/PBA_before_after_*.xlsx
+E_MRIO_GLORIA_Satellites/1b. GLORIAv60_Eutrophication_Satellites_anchored/
+E_MRIO_GLORIA_Satellites/2. GLORIA_vs_EEZ_check/
+_before_rerun_Nov2026/
 
 # ------------- Archived / scratch / superseded -------------
 **/0. Old/
