@@ -1,10 +1,10 @@
-NOx 2015 : placed 4.667900e+10 kg O2 in 5853255 nonzero cells
-NOx 2016 : placed 4.546534e+10 kg O2 in 5854780 nonzero cells
-NOx 2017 : placed 4.546503e+10 kg O2 in 5856610 nonzero cells
-NOx 2018 : placed 4.551117e+10 kg O2 in 5855695 nonzero cells
-NOx 2019 : placed 4.470103e+10 kg O2 in 5855695 nonzero cells
-NOx 2020 : placed 4.154862e+10 kg O2 in 5855390 nonzero cells
-NOx 2021 : placed 4.349692e+10 kg O2 in 5855390 nonzero cells
-NOx 2022 : placed 4.434688e+10 kg O2 in 5856915 nonzero cells
+NOx 2015 : placed 1.420665e+10 kg O2 in 5853255 nonzero cells
+NOx 2016 : placed 1.383728e+10 kg O2 in 5854780 nonzero cells
+NOx 2017 : placed 1.383718e+10 kg O2 in 5856610 nonzero cells
+NOx 2018 : placed 1.385123e+10 kg O2 in 5855695 nonzero cells
+NOx 2019 : placed 1.360466e+10 kg O2 in 5855695 nonzero cells
+NOx 2020 : placed 1.264523e+10 kg O2 in 5855390 nonzero cells
+NOx 2021 : placed 1.323819e+10 kg O2 in 5855390 nonzero cells
+NOx 2022 : placed 1.349687e+10 kg O2 in 5856915 nonzero cells
 NOTE: 3650 (label x region x year) splits used the GLOBAL fallback key
 REVIEW: 16 year(s) used a proxy split key (EMPTY_LABEL_PROXY, see header)

@@ -2,60 +2,60 @@ build_report.txt - rewritten by the verify step
 source = harmonised parquet | placed = matrix sum | excluded = out of GLORIA
 scope (ABNJ high seas, Antarctica) | unmatched = mapping failures (must be 0)
 
-Nleach 2015 : source 1.805616e+10 = placed 1.805616e+10 + excluded 0.000e+00 + unmatched 0.000e+00 | resid -3.8e-06  OK
-Nleach 2016 : source 1.813437e+10 = placed 1.813437e+10 + excluded 0.000e+00 + unmatched 0.000e+00 | resid +0.0e+00  OK
-Nleach 2017 : source 1.821258e+10 = placed 1.821258e+10 + excluded 0.000e+00 + unmatched 0.000e+00 | resid +0.0e+00  OK
-Nleach 2018 : source 1.829079e+10 = placed 1.829079e+10 + excluded 0.000e+00 + unmatched 0.000e+00 | resid +0.0e+00  OK
-Nleach 2019 : source 1.836899e+10 = placed 1.836899e+10 + excluded 0.000e+00 + unmatched 0.000e+00 | resid +3.8e-06  OK
+Nleach 2015 : source 1.804763e+10 = placed 1.804763e+10 + excluded 0.000e+00 + unmatched 0.000e+00 | resid +0.0e+00  OK
+Nleach 2016 : source 1.812315e+10 = placed 1.812315e+10 + excluded 0.000e+00 + unmatched 0.000e+00 | resid -3.8e-06  OK
+Nleach 2017 : source 1.820603e+10 = placed 1.820603e+10 + excluded 0.000e+00 + unmatched 0.000e+00 | resid -7.6e-06  OK
+Nleach 2018 : source 1.828276e+10 = placed 1.828276e+10 + excluded 0.000e+00 + unmatched 0.000e+00 | resid +0.0e+00  OK
+Nleach 2019 : source 1.836570e+10 = placed 1.836570e+10 + excluded 0.000e+00 + unmatched 0.000e+00 | resid +0.0e+00  OK
 Nleach 2020 : source 1.844720e+10 = placed 1.844720e+10 + excluded 0.000e+00 + unmatched 0.000e+00 | resid +3.8e-06  OK
 Nleach 2021 : source 1.846266e+10 = placed 1.846266e+10 + excluded 0.000e+00 + unmatched 0.000e+00 | resid +0.0e+00  OK
 Nleach 2022 : source 1.847812e+10 = placed 1.847812e+10 + excluded 0.000e+00 + unmatched 0.000e+00 | resid +0.0e+00  OK
 
 -- Nleach build notes --
-Nleach 2015 : placed 1.805616e+10 kg O2 in 4001 nonzero cells
-Nleach 2016 : placed 1.813437e+10 kg O2 in 4053 nonzero cells
-Nleach 2017 : placed 1.821258e+10 kg O2 in 4053 nonzero cells
-Nleach 2018 : placed 1.829079e+10 kg O2 in 4053 nonzero cells
-Nleach 2019 : placed 1.836899e+10 kg O2 in 4053 nonzero cells
+Nleach 2015 : placed 1.804763e+10 kg O2 in 4088 nonzero cells
+Nleach 2016 : placed 1.812315e+10 kg O2 in 4141 nonzero cells
+Nleach 2017 : placed 1.820603e+10 kg O2 in 4059 nonzero cells
+Nleach 2018 : placed 1.828276e+10 kg O2 in 4054 nonzero cells
+Nleach 2019 : placed 1.836570e+10 kg O2 in 4055 nonzero cells
 Nleach 2020 : placed 1.844720e+10 kg O2 in 4028 nonzero cells
 Nleach 2021 : placed 1.846266e+10 kg O2 in 4054 nonzero cells
 Nleach 2022 : placed 1.847812e+10 kg O2 in 4054 nonzero cells
-NH3    2015 : source 1.892538e+10 = placed 1.892503e+10 + excluded 3.518e+05 + unmatched 0.000e+00 | resid -2.1e-06  OK
-NH3    2016 : source 1.876530e+10 = placed 1.876494e+10 + excluded 3.689e+05 + unmatched 0.000e+00 | resid -1.2e-06  OK
-NH3    2017 : source 1.860910e+10 = placed 1.860871e+10 + excluded 3.910e+05 + unmatched 0.000e+00 | resid -1.9e-06  OK
-NH3    2018 : source 1.847065e+10 = placed 1.847025e+10 + excluded 4.049e+05 + unmatched 0.000e+00 | resid +4.5e-07  OK
-NH3    2019 : source 1.850470e+10 = placed 1.850429e+10 + excluded 4.101e+05 + unmatched 0.000e+00 | resid -3.4e-06  OK
-NH3    2020 : source 1.836213e+10 = placed 1.836191e+10 + excluded 2.197e+05 + unmatched 0.000e+00 | resid +2.1e-06  OK
-NH3    2021 : source 1.835585e+10 = placed 1.835560e+10 + excluded 2.500e+05 + unmatched 0.000e+00 | resid +1.7e-06  OK
-NH3    2022 : source 1.831744e+10 = placed 1.831714e+10 + excluded 2.980e+05 + unmatched 0.000e+00 | resid +4.0e-06  OK
+NH3    2015 : source 1.558561e+10 = placed 1.558532e+10 + excluded 2.897e+05 + unmatched 0.000e+00 | resid +6.4e-07  OK
+NH3    2016 : source 1.545378e+10 = placed 1.545348e+10 + excluded 3.038e+05 + unmatched 0.000e+00 | resid +1.0e-06  OK
+NH3    2017 : source 1.532514e+10 = placed 1.532482e+10 + excluded 3.220e+05 + unmatched 0.000e+00 | resid +3.0e-06  OK
+NH3    2018 : source 1.521113e+10 = placed 1.521079e+10 + excluded 3.335e+05 + unmatched 0.000e+00 | resid -2.7e-07  OK
+NH3    2019 : source 1.523916e+10 = placed 1.523882e+10 + excluded 3.378e+05 + unmatched 0.000e+00 | resid -2.5e-06  OK
+NH3    2020 : source 1.512176e+10 = placed 1.512158e+10 + excluded 1.809e+05 + unmatched 0.000e+00 | resid +1.5e-06  OK
+NH3    2021 : source 1.511659e+10 = placed 1.511638e+10 + excluded 2.059e+05 + unmatched 0.000e+00 | resid +1.2e-06  OK
+NH3    2022 : source 1.508495e+10 = placed 1.508470e+10 + excluded 2.454e+05 + unmatched 0.000e+00 | resid +5.5e-07  OK
 
 -- NH3 build notes --
-NH3 2015 : placed 1.892503e+10 kg O2 in 5844410 nonzero cells
-NH3 2016 : placed 1.876494e+10 kg O2 in 5844410 nonzero cells
-NH3 2017 : placed 1.860871e+10 kg O2 in 5846850 nonzero cells
-NH3 2018 : placed 1.847025e+10 kg O2 in 5846545 nonzero cells
-NH3 2019 : placed 1.850429e+10 kg O2 in 5848070 nonzero cells
-NH3 2020 : placed 1.836191e+10 kg O2 in 5848070 nonzero cells
-NH3 2021 : placed 1.835560e+10 kg O2 in 5848070 nonzero cells
-NH3 2022 : placed 1.831714e+10 kg O2 in 5848070 nonzero cells
+NH3 2015 : placed 1.558532e+10 kg O2 in 5844410 nonzero cells
+NH3 2016 : placed 1.545348e+10 kg O2 in 5844410 nonzero cells
+NH3 2017 : placed 1.532482e+10 kg O2 in 5846850 nonzero cells
+NH3 2018 : placed 1.521079e+10 kg O2 in 5846545 nonzero cells
+NH3 2019 : placed 1.523882e+10 kg O2 in 5848070 nonzero cells
+NH3 2020 : placed 1.512158e+10 kg O2 in 5848070 nonzero cells
+NH3 2021 : placed 1.511638e+10 kg O2 in 5848070 nonzero cells
+NH3 2022 : placed 1.508470e+10 kg O2 in 5848070 nonzero cells
 NOTE: 3802 (label x region x year) splits used the GLOBAL fallback key
-NOx    2015 : source 4.703890e+10 = placed 4.667900e+10 + excluded 3.599e+08 + unmatched 0.000e+00 | resid +2.7e-06  OK
-NOx    2016 : source 4.583416e+10 = placed 4.546534e+10 + excluded 3.688e+08 + unmatched 0.000e+00 | resid -6.6e-07  OK
-NOx    2017 : source 4.585865e+10 = placed 4.546503e+10 + excluded 3.936e+08 + unmatched 0.000e+00 | resid +1.8e-06  OK
-NOx    2018 : source 4.591535e+10 = placed 4.551117e+10 + excluded 4.042e+08 + unmatched 0.000e+00 | resid -6.1e-06  OK
-NOx    2019 : source 4.509880e+10 = placed 4.470103e+10 + excluded 3.978e+08 + unmatched 0.000e+00 | resid -2.6e-06  OK
-NOx    2020 : source 4.188403e+10 = placed 4.154862e+10 + excluded 3.354e+08 + unmatched 0.000e+00 | resid -4.8e-06  OK
-NOx    2021 : source 4.385749e+10 = placed 4.349692e+10 + excluded 3.606e+08 + unmatched 0.000e+00 | resid -5.0e-06  OK
-NOx    2022 : source 4.473485e+10 = placed 4.434688e+10 + excluded 3.880e+08 + unmatched 0.000e+00 | resid +9.5e-06  OK
+NOx    2015 : source 1.431619e+10 = placed 1.420665e+10 + excluded 1.095e+08 + unmatched 0.000e+00 | resid -7.2e-07  OK
+NOx    2016 : source 1.394953e+10 = placed 1.383728e+10 + excluded 1.122e+08 + unmatched 0.000e+00 | resid -3.2e-06  OK
+NOx    2017 : source 1.395698e+10 = placed 1.383718e+10 + excluded 1.198e+08 + unmatched 0.000e+00 | resid -9.7e-07  OK
+NOx    2018 : source 1.397424e+10 = placed 1.385123e+10 + excluded 1.230e+08 + unmatched 0.000e+00 | resid -5.2e-07  OK
+NOx    2019 : source 1.372572e+10 = placed 1.360466e+10 + excluded 1.211e+08 + unmatched 0.000e+00 | resid +2.2e-07  OK
+NOx    2020 : source 1.274731e+10 = placed 1.264523e+10 + excluded 1.021e+08 + unmatched 0.000e+00 | resid -5.4e-07  OK
+NOx    2021 : source 1.334793e+10 = placed 1.323819e+10 + excluded 1.097e+08 + unmatched 0.000e+00 | resid -5.2e-07  OK
+NOx    2022 : source 1.361495e+10 = placed 1.349687e+10 + excluded 1.181e+08 + unmatched 0.000e+00 | resid +6.9e-07  OK
 
 -- NOx build notes --
-NOx 2015 : placed 4.667900e+10 kg O2 in 5853255 nonzero cells
-NOx 2016 : placed 4.546534e+10 kg O2 in 5854780 nonzero cells
-NOx 2017 : placed 4.546503e+10 kg O2 in 5856610 nonzero cells
-NOx 2018 : placed 4.551117e+10 kg O2 in 5855695 nonzero cells
-NOx 2019 : placed 4.470103e+10 kg O2 in 5855695 nonzero cells
-NOx 2020 : placed 4.154862e+10 kg O2 in 5855390 nonzero cells
-NOx 2021 : placed 4.349692e+10 kg O2 in 5855390 nonzero cells
-NOx 2022 : placed 4.434688e+10 kg O2 in 5856915 nonzero cells
+NOx 2015 : placed 1.420665e+10 kg O2 in 5853255 nonzero cells
+NOx 2016 : placed 1.383728e+10 kg O2 in 5854780 nonzero cells
+NOx 2017 : placed 1.383718e+10 kg O2 in 5856610 nonzero cells
+NOx 2018 : placed 1.385123e+10 kg O2 in 5855695 nonzero cells
+NOx 2019 : placed 1.360466e+10 kg O2 in 5855695 nonzero cells
+NOx 2020 : placed 1.264523e+10 kg O2 in 5855390 nonzero cells
+NOx 2021 : placed 1.323819e+10 kg O2 in 5855390 nonzero cells
+NOx 2022 : placed 1.349687e+10 kg O2 in 5856915 nonzero cells
 NOTE: 3650 (label x region x year) splits used the GLOBAL fallback key
 REVIEW: 16 year(s) used a proxy split key (EMPTY_LABEL_PROXY, see header)

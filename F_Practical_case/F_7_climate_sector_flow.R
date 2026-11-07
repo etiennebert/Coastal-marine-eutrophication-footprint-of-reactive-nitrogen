@@ -97,7 +97,7 @@ fig <- ggplot(sec, aes(pct, group, fill = path)) +
         plot.margin = margin(4, 14, 4, 4))
 
 ggsave(file.path(FIG, sprintf("Fig_climate_sector_flow_%d.pdf", YEAR)), fig,
-       width = 150, height = 235, units = "mm")
+       width = 150, height = 235, units = "mm", device = cairo_pdf)   # keeps NOₓ subscripts
 ggsave(file.path(FIG, sprintf("Fig_climate_sector_flow_%d.png", YEAR)), fig,
        width = 150, height = 235, units = "mm", dpi = 300)
 sec |> select(-txt) |> arrange(climate, group, path) |>

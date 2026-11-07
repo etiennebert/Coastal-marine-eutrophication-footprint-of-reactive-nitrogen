@@ -106,9 +106,11 @@ if "%RUN_FIGURES_PY%"=="1" (
     call :step "%ROOT%F_Practical_case" F_6_build_database.py %%Y
     if errorlevel 1 goto :fail
   )
+  call :step "%ROOT%F_Practical_case" F_8_table1_data.py
+  if errorlevel 1 goto :fail
   echo.
   echo  Then run in R:  F_2_Figures_CBA_PBA.R  and  F_7_climate_sector_flow.R
-  echo  and in node:    make_table1.js
+  echo  and in node:    make_table1.js  [reads 2. figures\Table1_data.json from F_8]
 )
 
 echo.

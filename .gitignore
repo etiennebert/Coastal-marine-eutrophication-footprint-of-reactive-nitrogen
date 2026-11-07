@@ -71,8 +71,12 @@ F_Practical_case/1. results_anchored/
 F_Practical_case/2. figures/
 F_Practical_case/*.docx
 F_Practical_case/*.xlsx
+!F_Practical_case/SI_2_Supplementary Table.xlsx
 F_Practical_case/.RData
 F_Practical_case/.Rhistory
+F_Practical_case/node_modules/
+F_Practical_case/package.json
+F_Practical_case/package-lock.json
 
 # ------------- Regenerable result tables of the anchored batch -------------
 E_MRIO_GLORIA_Satellites/PBA_before_after_*.xlsx

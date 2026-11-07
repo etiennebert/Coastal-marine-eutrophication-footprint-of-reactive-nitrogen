@@ -55,7 +55,7 @@ RUN_PBA    = true;      % PBA extraction + CBA-vs-PBA tables (satellite only, no
 gloria_vrs = 60;
 startYear  = 2015;
 endYear    = 2022;
-BATCH      = 'original';                        % 'original' (territorial) or 'anchored'
+BATCH      = 'anchored';                        % 'original' (territorial) or 'anchored'
                                                 % (GLORIA-anchored satellites from
                                                 %  E/2_make_anchored_satellites.py)
 GLORIA_ROOT = 'D:';                             % drive/folder holding GLORIA_MRIOS_<vrs>
@@ -116,7 +116,6 @@ sec_name = regexprep(sec_name, '\s+(industry|product)$', '');
 % NOTE the consuming columns of Y_cty / x_cty follow this same 164-region
 % GLORIA order (meta.con_y aggregates the 6 demand categories per region).
 
-n_long = 0; long_parts = {};                     % accumulator for the tidy master
 
 %% 2) year loop - load GLORIA matrices once per year, then run the three flows
 for year = startYear:endYear
@@ -144,7 +143,23 @@ for year = startYear:endYear
             haveL = false;
         else
             fprintf('  loading L (be patient, ~12 GB) ...\n'); tic
-            tmp = load(fL, 'L');      L     = tmp.L;      toc
+            clear L tmp                                % L needs ONE free ~12 GB block: drop any old copy first
+            for attempt = 1:2                          % one retry: a 12 GB read from an external drive can hiccup
+                try
+                    tmp = load(fL, 'L');  L = tmp.L;  clear tmp
+                    break
+                catch err
+                    clear tmp L
+                    if attempt == 2
+                        error(['%d: cannot read %s (%s).\nClose other programs, restart MATLAB and rerun ' ...
+                               'with startYear = %d: finished years are kept, and the master table is ' ...
+                               'rebuilt from all years at the end.'], year, fL, err.message, year);
+                    end
+                    warning('%d: reading L failed (%s) - retrying in 30 s', year, err.message);
+                    pause(30);
+                end
+            end
+            toc
             tmp = load(fY, 'Y_cty');  Y_cty = tmp.Y_cty;
             haveL = true;
         end
@@ -186,15 +201,6 @@ for year = startYear:endYear
             T = [table(cellstr(rows_sat), 'VariableNames', {'LME_ss'}), ...
                  array2table(FP, 'VariableNames', reg_codes')];
             writetable(T, fullfile(CBA_DIR, sprintf('FP_%s_%d.csv', flow, year)));
-            nb = numel(FP);
-            long_parts{end+1} = table( ...
-                repmat(year, nb, 1), ...
-                repmat({flow}, nb, 1), ...
-                repmat(cellstr(rows_sat), 164, 1), ...
-                repelem(reg_codes, 305), ...
-                FP(:), ...
-                'VariableNames', {'year', 'flow', 'LME_ss', 'consumer_region', 'kgO2'}); %#ok<SAGROW>
-            n_long = n_long + nb;
         end
 
         % ---- PBA + CBA-vs-PBA per focus LME. The PBA is simply the satellite
@@ -280,9 +286,34 @@ for year = startYear:endYear
 end
 
 %% 3) tidy master + done
-if RUN_AGG && ~isempty(long_parts)
-    writetable(vertcat(long_parts{:}), fullfile(CBA_DIR, 'FP_all_years_long.csv'));
-    fprintf('\nlong master written: %d rows -> 1. results\\CBA\\FP_all_years_long.csv\n', n_long);
+%   The master is rebuilt from ALL per-year FP_<flow>_<year>.csv files in CBA_DIR, so a run
+%   restarted at a later year, or split over several MATLAB sessions, still gives 2015-2022.
+if RUN_AGG
+  try                                        % never lose a finished run on this summary step
+    ff = dir(fullfile(CBA_DIR, 'FP_*.csv'));
+    parts = {}; n_long = 0;
+    for k = 1:numel(ff)
+        tok = regexp(ff(k).name, '^FP_(Nleach|NH3|NOx)_(\d{4})\.csv$', 'tokens', 'once');
+        if isempty(tok), continue, end
+        C    = readcell(fullfile(ff(k).folder, ff(k).name), 'Delimiter', ',');
+        regs = string(cellfun(@num2str, C(1, 2:end), 'UniformOutput', false));   % consumer region codes
+        labs = string(cellfun(@num2str, C(2:end, 1), 'UniformOutput', false));   % LME labels ('10' may load as a number)
+        V    = cell2mat(C(2:end, 2:end));      % 305 x 164 kg O2
+        [nr, nc] = size(V);
+        parts{end+1} = table(repmat(str2double(tok{2}), nr*nc, 1), repmat(string(tok{1}), nr*nc, 1), ...
+                             repmat(labs, nc, 1), repelem(regs(:), nr), V(:), ...
+                             'VariableNames', {'year', 'flow', 'LME_ss', 'consumer_region', 'kgO2'}); %#ok<AGROW>
+        n_long = n_long + nr*nc;
+    end
+    if ~isempty(parts)
+        M = sortrows(vertcat(parts{:}), {'year', 'flow'});
+        writetable(M, fullfile(CBA_DIR, 'FP_all_years_long.csv'));
+        fprintf('\nlong master written: %d rows, years %s -> %s\n', n_long, ...
+                mat2str(unique(M.year)'), fullfile(CBA_DIR, 'FP_all_years_long.csv'));
+    end
+  catch err
+    warning('master table not written (%s) - the per-year FP_*.csv files are complete.', err.message);
+  end
 end
 disp('DONE.  CBA matrices in ''1. results\CBA'', PBA vectors in ''1. results\PBA'',');
 disp('       region-level comparison tables in ''1. results\CBA_vs_PBA''.');

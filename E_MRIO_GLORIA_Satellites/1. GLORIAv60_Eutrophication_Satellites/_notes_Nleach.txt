@@ -1,8 +1,8 @@
-Nleach 2015 : placed 1.805616e+10 kg O2 in 4001 nonzero cells
-Nleach 2016 : placed 1.813437e+10 kg O2 in 4053 nonzero cells
-Nleach 2017 : placed 1.821258e+10 kg O2 in 4053 nonzero cells
-Nleach 2018 : placed 1.829079e+10 kg O2 in 4053 nonzero cells
-Nleach 2019 : placed 1.836899e+10 kg O2 in 4053 nonzero cells
+Nleach 2015 : placed 1.804763e+10 kg O2 in 4088 nonzero cells
+Nleach 2016 : placed 1.812315e+10 kg O2 in 4141 nonzero cells
+Nleach 2017 : placed 1.820603e+10 kg O2 in 4059 nonzero cells
+Nleach 2018 : placed 1.828276e+10 kg O2 in 4054 nonzero cells
+Nleach 2019 : placed 1.836570e+10 kg O2 in 4055 nonzero cells
 Nleach 2020 : placed 1.844720e+10 kg O2 in 4028 nonzero cells
 Nleach 2021 : placed 1.846266e+10 kg O2 in 4054 nonzero cells
 Nleach 2022 : placed 1.847812e+10 kg O2 in 4054 nonzero cells

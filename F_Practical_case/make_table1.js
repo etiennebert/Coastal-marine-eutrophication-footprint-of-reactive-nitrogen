@@ -6,25 +6,16 @@ const W = [2130, 2950, 1880, 1400, 1000];           // DXA, sum 9360 = 6.5" on L
 const NONE = { style: d.BorderStyle.NONE, size: 0, color: "FFFFFF" };
 const LINE = (sz) => ({ style: d.BorderStyle.SINGLE, size: sz, color: "000000" });
 
-// mean 2015-2022, computed from 1. results/CBA_vs_PBA (PBA, all pathways summed)
-// [site (ss), site mean total t O2-eq/yr, bordering countries,
-//  [country, mean impact t O2-eq/yr, share %] x3 ]
-const DATA = [
-  ["Kane'ohe Bay (10)", "48.5", "United States (Hawaiʻi)",
-    [["China†", "15.0", "30.9"], ["Japan†", "8.5", "17.6"], ["United States", "7.7", "15.9"]]],
-  ["Bocas del Toro (12.1)", "40,700", "Panama, Costa Rica, Nicaragua, Honduras, Guatemala, Belize, Mexico, Colombia",
-    [["Mexico", "16,100", "39.6"], ["United States†", "6,490", "15.9"], ["Nicaragua", "3,710", "9.1"]]],
-  ["Crocker Reef (12.2)", "25,800", "United States, Cuba, Bahamas",
-    [["United States", "10,800", "42.0"], ["Cuba", "7,040", "27.3"], ["Mexico†", "2,100", "8.1"]]],
-  ["Taiping (36.13)", "48,700", "Viet Nam, Philippines, Malaysia, Brunei",
-    [["Viet Nam", "20,300", "41.6"], ["Indonesia†", "6,210", "12.8"], ["China†", "6,070", "12.5"]]],
-  ["Dongsha (36.18)", "242,000", "China, Taiwan, Philippines",
-    [["China", "174,000", "71.8"], ["Rest of Asia-Pacific*", "20,500", "8.4"], ["India†", "8,890", "3.7"]]],
-  ["Okinawa (49)", "516,000", "Japan, Taiwan",
-    [["Japan", "226,000", "43.7"], ["China†", "192,000", "37.2"], ["South Korea†", "35,600", "6.9"]]],
-  ["Heron Island (40.4)", "3,840", "Australia",
-    [["Australia", "3,690", "96.0"], ["Indonesia†", "32.7", "0.9"], ["Papua New Guinea†", "18.6", "0.5"]]],
-];
+// numbers: mean 2015-2022 from 1. results/CBA_vs_PBA (PBA, all pathways summed),
+// computed by F_8_table1_data.py -> 2. figures/Table1_data.json
+// rows: [site (ss), site mean total t O2-eq/yr, bordering countries,
+//        [country, mean impact t O2-eq/yr, share %] x3 ]
+const path = require("path");
+const JSON_IN = path.join(__dirname, "2. figures", "Table1_data.json");
+if (!fs.existsSync(JSON_IN)) { console.error("run  python F_8_table1_data.py  first"); process.exit(1); }
+const T1 = JSON.parse(fs.readFileSync(JSON_IN, "utf8"));
+const DATA = T1.data;
+const JOINT = `${T1.joint_top3_pct[0]}–${T1.joint_top3_pct[1]}%`;
 
 const txt = (t, opts = {}) => new d.TextRun({ text: t, font: F, size: 20, ...opts });
 const para = (runs, opts = {}) =>
@@ -87,7 +78,7 @@ const capRuns = [
   txt("x", { size: 22, subScript: true }),
   txt("). Impacts are mean annual values over 2015–2022, in tonnes of O", { size: 22 }),
   txt("2", { size: 22, subScript: true }),
-  txt("-eq per year (three significant figures); the grey figure under each site name is the sub-segment’s mean total impact. Shares are relative to that total; the three leading producers jointly account for 64–97% of each sub-segment’s burden.", { size: 22 }),
+  txt("-eq per year (three significant figures); the grey figure under each site name is the sub-segment’s mean total impact. Shares are relative to that total; the three leading producers jointly account for " + JOINT + " of each sub-segment’s burden.", { size: 22 }),
 ];
 const notes = [
   new d.Paragraph({ spacing: { before: 80 }, children: [
@@ -109,4 +100,4 @@ const doc = new d.Document({
   }],
 });
 
-d.Packer.toBuffer(doc).then(b => { fs.writeFileSync("/home/claude/Table1_producing_countries.docx", b); console.log("written"); });
+d.Packer.toBuffer(doc).then(b => { const out = path.join(__dirname, "2. figures", "Table1_producing_countries.docx"); fs.writeFileSync(out, b); console.log("written -> " + out); });

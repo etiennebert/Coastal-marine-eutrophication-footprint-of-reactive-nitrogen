@@ -26,6 +26,8 @@ library(tidyverse)
 library(scales)
 library(readxl)
 library(patchwork)
+if (packageVersion("ggplot2") >= "4.0.0" && packageVersion("patchwork") < "1.3.1")
+  stop("ggplot2 4 needs patchwork >= 1.3.1:  install.packages(\"patchwork\")  then rerun")
 
 BASE <- tryCatch(dirname(rstudioapi::getSourceEditorContext()$path),
                  error = function(e) getwd())
@@ -80,7 +82,8 @@ THEME <- theme_minimal(base_size = 9) +
         axis.title.x = element_blank())
 
 save_fig <- function(p, name, w_mm, h_mm) {
-  ggsave(file.path(FIG, paste0(name, ".pdf")), p, width = w_mm, height = h_mm, units = "mm")
+  ggsave(file.path(FIG, paste0(name, ".pdf")), p, width = w_mm, height = h_mm, units = "mm",
+         device = cairo_pdf)                       # cairo: keeps subscripts such as NOₓ in the PDF
   ggsave(file.path(FIG, paste0(name, ".png")), p, width = w_mm, height = h_mm, units = "mm", dpi = 300)
   message("written: 2. figures/", name, ".pdf + .png")
 }
@@ -186,8 +189,8 @@ for (a in intersect(levels(sec$area), unique(as.character(sec$area)))) {
     labs(subtitle = a, x = NULL, y = NULL) + THEME +
     theme(plot.subtitle = element_text(face = "bold", colour = "black"))
 }
-fig3 <- wrap_plots(panels, ncol = 2, guides = "collect") &
-  theme(legend.position = "bottom")
+fig3 <- wrap_plots(panels, ncol = 2, guides = "collect") +
+  plot_annotation(theme = theme(legend.position = "bottom"))   # not `& theme()`: breaks with ggplot2 4 + old patchwork
 fig3 <- fig3 + plot_annotation(
   tag_levels = "a",            # panel letters a-g, same order as Figure 1
   caption = str_wrap(paste0("Production-based sector contributions, mean over ",
